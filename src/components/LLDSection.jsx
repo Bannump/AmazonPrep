@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ExternalLink, Link as LinkIcon, Github, FileText, Save } from 'lucide-react';
 import { lldProblems } from '../data/lldProblems';
-import { getLLDProblems, saveLLDProblem } from '../utils/storage';
+import * as userStorage from '../utils/userStorage';
 
-const LLDSection = () => {
+const LLDSection = ({ userId = null }) => {
   const [lldData, setLldData] = useState({});
   const [expandedCards, setExpandedCards] = useState({});
   const [editingProblem, setEditingProblem] = useState(null);
@@ -16,10 +16,11 @@ const LLDSection = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [userId]);
 
-  const loadData = () => {
-    setLldData(getLLDProblems());
+  const loadData = async () => {
+    const data = await userStorage.getLLDProblems(userId);
+    setLldData(data);
   };
 
   const toggleCard = (id) => {
@@ -40,9 +41,9 @@ const LLDSection = () => {
     });
   };
 
-  const handleSave = (problemId) => {
-    saveLLDProblem(problemId, editForm);
-    loadData();
+  const handleSave = async (problemId) => {
+    await userStorage.saveLLDProblem(problemId, editForm, userId);
+    await loadData();
     setEditingProblem(null);
     setEditForm({
       resourceLink: '',

@@ -1,49 +1,81 @@
 import React, { useState, useEffect } from 'react';
-import { Code2, Users, Box, Download, Upload } from 'lucide-react';
+import { Code2, Users, Box, Download, Upload, LogOut } from 'lucide-react';
+import { useAuth } from './contexts/AuthContext';
+import Login from './components/Login';
 import ProgressBar from './components/ProgressBar';
 import DSASection from './components/DSASection';
 import LeadershipPrinciplesSection from './components/LeadershipPrinciplesSection';
 import LLDSection from './components/LLDSection';
-import { exportAllData, importAllData, getDSAProblems } from './utils/storage';
+import { exportAllData } from './utils/userStorage';
+import { importAllData } from './utils/storage';
+import { getDSAProblems } from './utils/storage';
 
 function App() {
+  const { currentUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('dsa');
   const [dsaData, setDsaData] = useState({});
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    // Load initial data
-    setDsaData(getDSAProblems());
-  }, []);
+    if (currentUser) {
+      loadDSAData();
+    } else {
+      setDsaData(getDSAProblems());
+    }
+  }, [currentUser]);
 
-  const handleDSAUpdate = () => {
-    const updatedData = getDSAProblems();
-    setDsaData(updatedData);
+  const loadDSAData = async () => {
+    if (currentUser) {
+      const { getDSAProblems } = await import('./utils/userStorage');
+      const data = await getDSAProblems(currentUser.uid);
+      setDsaData(data);
+    }
+  };
+
+  const handleDSAUpdate = async () => {
+    if (currentUser) {
+      await loadDSAData();
+    } else {
+      setDsaData(getDSAProblems());
+    }
     setRefreshTrigger(prev => prev + 1);
   };
 
-  const handleExport = () => {
-    const data = exportAllData();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `amazon-prep-backup-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const data = await exportAllData(currentUser?.uid || null);
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `amazon-prep-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      alert('Error exporting data. Please try again.');
+    }
   };
 
   const handleImport = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'application/json';
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
           try {
             const data = JSON.parse(event.target.result);
             importAllData(data);
@@ -59,6 +91,10 @@ function App() {
     input.click();
   };
 
+  if (!currentUser) {
+    return <Login />;
+  }
+
   const tabs = [
     { id: 'dsa', label: 'DSA Problems', icon: Code2 },
     { id: 'behavioral', label: 'Leadership Principles', icon: Users },
@@ -67,13 +103,19 @@ function App() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      {/* Header */}
       <header className="bg-zinc-950 border-b border-zinc-900/50 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-zinc-100">Amazon Interview Prep Dashboard</h1>
-              <p className="text-sm text-zinc-400 mt-1">Track your progress across DSA, Behavioral, and LLD</p>
+              <p className="text-sm text-zinc-400 mt-1">
+                Track your progress across DSA, Behavioral, and LLD
+                {currentUser && (
+                  <span className="ml-2 text-blue-400">
+                    • {currentUser.displayName || currentUser.email}
+                  </span>
+                )}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -90,17 +132,22 @@ function App() {
                 <Upload className="w-4 h-4" />
                 Import Backup
               </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-100 rounded-lg transition-colors flex items-center gap-2 border border-zinc-800"
+                title="Sign out"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Sign Out</span>
+              </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Progress Bar */}
         <ProgressBar dsaData={dsaData} refreshTrigger={refreshTrigger} />
 
-        {/* Tabs */}
         <div className="flex flex-wrap gap-2 mb-6 border-b border-zinc-800/50">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -121,11 +168,10 @@ function App() {
           })}
         </div>
 
-        {/* Tab Content */}
         <div>
-          {activeTab === 'dsa' && <DSASection onDataUpdate={handleDSAUpdate} />}
-          {activeTab === 'behavioral' && <LeadershipPrinciplesSection />}
-          {activeTab === 'lld' && <LLDSection />}
+          {activeTab === 'dsa' && <DSASection onDataUpdate={handleDSAUpdate} userId={currentUser?.uid} />}
+          {activeTab === 'behavioral' && <LeadershipPrinciplesSection userId={currentUser?.uid} />}
+          {activeTab === 'lld' && <LLDSection userId={currentUser?.uid} />}
         </div>
       </main>
     </div>

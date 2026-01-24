@@ -2,6 +2,14 @@
 
 A comprehensive React + Tailwind CSS dashboard to track your Amazon interview preparation across DSA problems, Leadership Principles, and Low-Level Design.
 
+**Features:**
+- 🔐 Google OAuth authentication
+- ☁️ Cloud storage for personalized progress (Firebase Firestore)
+- 📊 Real-time progress tracking
+- ⏱️ Practice timers for DSA problems
+- 📝 STAR method stories for Leadership Principles
+- 🏗️ LLD design pattern tracking
+
 ## Features
 
 ### 1. DSA Section (LeetCode Tracker)
@@ -33,6 +41,55 @@ A comprehensive React + Tailwind CSS dashboard to track your Amazon interview pr
 
 ## Getting Started
 
+### Prerequisites
+
+- Node.js (v16 or higher)
+- A Firebase project (for authentication and cloud storage)
+
+### Firebase Setup
+
+**Important:** This app requires Firebase for Google authentication and cloud storage.
+
+1. **Create a Firebase Project:**
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Create a new project or use an existing one
+
+2. **Enable Google Authentication:**
+   - Go to Authentication > Sign-in method
+   - Enable Google provider
+
+3. **Create Firestore Database:**
+   - Go to Firestore Database
+   - Create database in test mode (for development)
+
+4. **Get Firebase Config:**
+   - Go to Project Settings > General
+   - Add a web app and copy the config values
+
+5. **Create `.env` file:**
+   ```env
+   VITE_FIREBASE_API_KEY=your-api-key
+   VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=your-project-id
+   VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+   VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+   VITE_FIREBASE_APP_ID=your-app-id
+   ```
+
+6. **Set Firestore Security Rules:**
+   ```javascript
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /users/{userId} {
+         allow read, write: if request.auth != null && request.auth.uid == userId;
+       }
+     }
+   }
+   ```
+
+See `FIREBASE_SETUP.md` for detailed instructions.
+
 ### Installation
 
 1. Install dependencies:
@@ -40,12 +97,16 @@ A comprehensive React + Tailwind CSS dashboard to track your Amazon interview pr
 npm install
 ```
 
-2. Start the development server:
+2. Configure Firebase (see above)
+
+3. Start the development server:
 ```bash
 npm run dev
 ```
 
-3. Open your browser to `http://localhost:5173`
+4. Open your browser to `http://localhost:5173`
+
+5. Sign in with Google to start tracking your progress!
 
 ### Building for Production
 

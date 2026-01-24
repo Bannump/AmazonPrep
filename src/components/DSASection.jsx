@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Search, ExternalLink, Clock, CheckCircle2, Circle, X, XCircle } from 'lucide-react';
 import { problems } from '../data/problems';
-import {
-  getDSAProblems,
-  saveDSAProblem,
-  getActiveTimers,
-  saveActiveTimer,
-  removeActiveTimer
-} from '../utils/storage';
+import * as userStorage from '../utils/userStorage';
 
-const DSASection = ({ onDataUpdate }) => {
+const DSASection = ({ onDataUpdate, userId = null }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -27,10 +21,10 @@ const DSASection = ({ onDataUpdate }) => {
       loadTimers();
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [userId]);
 
-  const loadData = () => {
-    const data = getDSAProblems();
+  const loadData = async () => {
+    const data = await userStorage.getDSAProblems(userId);
     setDsaData(data);
     // Notify parent component of data update
     if (onDataUpdate) {
@@ -38,8 +32,8 @@ const DSASection = ({ onDataUpdate }) => {
     }
   };
 
-  const loadTimers = () => {
-    const timers = getActiveTimers();
+  const loadTimers = async () => {
+    const timers = await userStorage.getActiveTimers(userId);
     setActiveTimers(timers);
   };
 
@@ -54,7 +48,7 @@ const DSASection = ({ onDataUpdate }) => {
     return `https://leetcode.com/problems/${slug}/`;
   };
 
-  const handlePractice = (problemId) => {
+  const handlePractice = async (problemId) => {
     const problem = problems.find(p => p.id === problemId);
     if (!problem) return;
 
@@ -63,7 +57,7 @@ const DSASection = ({ onDataUpdate }) => {
 
     // Start timer
     const startTime = Date.now();
-    saveActiveTimer(problemId, startTime);
+    await userStorage.saveActiveTimer(problemId, startTime, userId);
     setActiveTimers({ ...activeTimers, [problemId]: startTime });
   };
 
@@ -81,20 +75,20 @@ const DSASection = ({ onDataUpdate }) => {
     return Date.now() - startTime;
   };
 
-  const handleCancelTimer = (problemId) => {
-    removeActiveTimer(problemId);
+  const handleCancelTimer = async (problemId) => {
+    await userStorage.removeActiveTimer(problemId, userId);
     const newTimers = { ...activeTimers };
     delete newTimers[problemId];
     setActiveTimers(newTimers);
   };
 
-  const handleMarkDone = (problemId) => {
+  const handleMarkDone = async (problemId) => {
     const elapsedTime = getElapsedTime(problemId);
     let timeTaken = null;
     
     if (elapsedTime !== null) {
       timeTaken = formatTime(elapsedTime);
-      removeActiveTimer(problemId);
+      await userStorage.removeActiveTimer(problemId, userId);
       const newTimers = { ...activeTimers };
       delete newTimers[problemId];
       setActiveTimers(newTimers);
@@ -106,25 +100,25 @@ const DSASection = ({ onDataUpdate }) => {
     setSolutionText(dsaData[problemId]?.solution || '');
   };
 
-  const handleSaveSolution = (problemId) => {
+  const handleSaveSolution = async (problemId) => {
     const problemData = dsaData[problemId] || {};
     // Use pending time if available, otherwise keep existing time
     const timeTaken = pendingTimeTaken || problemData.timeTaken || '';
 
-    saveDSAProblem(problemId, {
+    await userStorage.saveDSAProblem(problemId, {
       status: 'Done',
       timeTaken,
       solution: solutionText
-    });
-    loadData();
+    }, userId);
+    await loadData();
     setShowSolutionModal(null);
     setSolutionText('');
     setPendingTimeTaken(null);
   };
 
-  const handleUnmarkDone = (problemId) => {
-    saveDSAProblem(problemId, { status: 'Todo' });
-    loadData();
+  const handleUnmarkDone = async (problemId) => {
+    await userStorage.saveDSAProblem(problemId, { status: 'Todo' }, userId);
+    await loadData();
   };
 
   const filteredProblems = problems.filter(problem => {

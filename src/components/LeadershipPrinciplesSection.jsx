@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { leadershipPrinciples } from '../data/leadershipPrinciples';
-import { getLeadershipPrinciples, saveLeadershipPrinciple } from '../utils/storage';
+import * as userStorage from '../utils/userStorage';
 
-const LeadershipPrinciplesSection = () => {
+const LeadershipPrinciplesSection = ({ userId = null }) => {
   const [expandedCards, setExpandedCards] = useState({});
   const [principlesData, setPrinciplesData] = useState({});
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [userId]);
 
-  const loadData = () => {
-    setPrinciplesData(getLeadershipPrinciples());
+  const loadData = async () => {
+    const data = await userStorage.getLeadershipPrinciples(userId);
+    setPrinciplesData(data);
   };
 
   const toggleCard = (id) => {
@@ -22,9 +23,9 @@ const LeadershipPrinciplesSection = () => {
     }));
   };
 
-  const handleStoryChange = (id, value) => {
-    saveLeadershipPrinciple(id, { starStory: value });
-    loadData();
+  const handleStoryChange = async (id, value) => {
+    await userStorage.saveLeadershipPrinciple(id, { starStory: value }, userId);
+    await loadData();
   };
 
   const getStatus = (id) => {
@@ -38,9 +39,9 @@ const LeadershipPrinciplesSection = () => {
     return { text: 'Draft', color: 'bg-yellow-500/20 text-yellow-400' };
   };
 
-  const handleStatusChange = (id, status) => {
-    saveLeadershipPrinciple(id, { status });
-    loadData();
+  const handleStatusChange = async (id, status) => {
+    await userStorage.saveLeadershipPrinciple(id, { status }, userId);
+    await loadData();
   };
 
   return (
