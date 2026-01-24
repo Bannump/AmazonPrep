@@ -91,10 +91,20 @@ npm run dev
 - **"Firebase: Error (auth/unauthorized-domain)"**: Add your domain to Firebase Console > Authentication > Settings > Authorized domains
 - **"Permission denied"**: Check your Firestore security rules
 - **"Firebase app not initialized"**: Make sure your `.env` file has all the correct values and you restarted the dev server after changing it
+- **Works on localhost but not on Vercel**: (1) Add all `VITE_FIREBASE_*` env vars in Vercel Project → Settings → Environment Variables, then redeploy. (2) Add your Vercel domain (e.g. `your-app.vercel.app`) to Firebase → Authentication → Authorized domains. (3) Ensure `vercel.json` includes the SPA `rewrites` so routes serve `index.html`.
 
-## Production Deployment
+## Production Deployment (Vercel)
 
-When deploying to production:
-1. Update Firestore rules to production mode
-2. Add your production domain to authorized domains
-3. Make sure environment variables are set in your hosting platform (Vercel, Netlify, etc.)
+1. **Environment variables**  
+   In Vercel: Project → **Settings** → **Environment Variables**. Add each `VITE_FIREBASE_*` from your `.env` (see Step 5). Apply to **Production**, **Preview**, and **Development**. Redeploy after changing them.
+
+2. **Firebase Authorized Domains**  
+   Firebase Console → **Authentication** → **Settings** → **Authorized domains**. Add your Vercel domain(s), e.g. `your-project.vercel.app`. Wildcards are not supported—add each domain you use (production and any preview URLs if you sign in there).
+
+3. **SPA routing**  
+   `vercel.json` already includes rewrites so all routes serve `index.html`. No extra config needed.
+
+4. **Deploy**  
+   Push to your linked Git repo, or run `vercel` / `vercel --prod` from the project root.
+
+When deploying elsewhere (Netlify, etc.): set the same env vars, add your domain to Firebase authorized domains, and configure SPA fallback to `index.html`.
