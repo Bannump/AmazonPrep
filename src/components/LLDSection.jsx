@@ -64,7 +64,7 @@ const LLDSection = () => {
 
   return (
     <div className="space-y-4">
-      <div className="bg-zinc-800 rounded-lg p-4 mb-6">
+      <div className="bg-zinc-900/50 rounded-lg p-4 mb-6 border border-zinc-800/50">
         <p className="text-zinc-300 text-sm">
           Track your Low-Level Design (LLD) practice. Document key classes, design patterns, and link to your diagrams or code.
         </p>
@@ -79,15 +79,15 @@ const LLDSection = () => {
           return (
             <div
               key={problem.id}
-              className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden"
+              className="bg-zinc-900/50 rounded-lg border border-zinc-800/50 overflow-hidden"
             >
               <div
-                className="p-4 cursor-pointer hover:bg-zinc-800/50 transition-colors"
+                className="p-4 cursor-pointer hover:bg-zinc-900/30 transition-colors"
                 onClick={() => !isEditing && toggleCard(problem.id)}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-1">
+                    <h3 className="text-lg font-semibold text-zinc-100 mb-1">
                       {problem.id}. {problem.title}
                     </h3>
                     <p className="text-sm text-zinc-400">{problem.description}</p>
@@ -98,7 +98,7 @@ const LLDSection = () => {
                         e.stopPropagation();
                         handleEdit(problem);
                       }}
-                      className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-sm transition-colors flex items-center gap-1"
+                      className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-zinc-50 rounded text-sm transition-colors flex items-center gap-1"
                     >
                       <FileText className="w-4 h-4" />
                       {data.keyClasses || data.resourceLink ? 'Edit' : 'Add Details'}
@@ -108,7 +108,7 @@ const LLDSection = () => {
               </div>
 
               {(isExpanded || isEditing) && (
-                <div className="border-t border-zinc-800 p-4 space-y-4">
+                <div className="border-t border-zinc-800/50 p-4 space-y-4">
                   {isEditing ? (
                     <div className="space-y-4">
                       <div>
@@ -121,7 +121,7 @@ const LLDSection = () => {
                           value={editForm.resourceLink}
                           onChange={(e) => setEditForm({ ...editForm, resourceLink: e.target.value })}
                           placeholder="https://..."
-                          className="w-full p-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          className="w-full p-2 bg-zinc-950 border border-zinc-900 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50"
                         />
                       </div>
 
@@ -133,7 +133,7 @@ const LLDSection = () => {
                           value={editForm.keyClasses}
                           onChange={(e) => setEditForm({ ...editForm, keyClasses: e.target.value })}
                           placeholder="e.g., Strategy Pattern for Pricing, Factory Pattern for Vehicle Creation..."
-                          className="w-full h-32 p-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+                          className="w-full h-32 p-3 bg-zinc-900 border border-zinc-900 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 resize-none"
                         />
                       </div>
 
@@ -147,7 +147,7 @@ const LLDSection = () => {
                           value={editForm.githubLink}
                           onChange={(e) => setEditForm({ ...editForm, githubLink: e.target.value })}
                           placeholder="https://github.com/..."
-                          className="w-full p-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          className="w-full p-2 bg-zinc-950 border border-zinc-900 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50"
                         />
                       </div>
 
@@ -161,20 +161,20 @@ const LLDSection = () => {
                           value={editForm.excalidrawLink}
                           onChange={(e) => setEditForm({ ...editForm, excalidrawLink: e.target.value })}
                           placeholder="https://excalidraw.com/..."
-                          className="w-full p-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          className="w-full p-2 bg-zinc-950 border border-zinc-900 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50"
                         />
                       </div>
 
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={handleCancel}
-                          className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white rounded transition-colors"
+                          className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-100 rounded transition-colors"
                         >
                           Cancel
                         </button>
                         <button
                           onClick={() => handleSave(problem.id)}
-                          className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded transition-colors flex items-center gap-2"
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-zinc-50 rounded transition-colors flex items-center gap-2"
                         >
                           <Save className="w-4 h-4" />
                           Save
@@ -190,7 +190,7 @@ const LLDSection = () => {
                             href={data.resourceLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="ml-2 text-amber-400 hover:text-amber-300 flex items-center gap-1"
+                            className="ml-2 text-blue-400 hover:text-blue-300 flex items-center gap-1"
                           >
                             <ExternalLink className="w-4 h-4" />
                             Open Link
@@ -212,7 +212,7 @@ const LLDSection = () => {
                             href={data.githubLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="ml-2 text-amber-400 hover:text-amber-300 flex items-center gap-1"
+                            className="ml-2 text-blue-400 hover:text-blue-300 flex items-center gap-1"
                           >
                             <Github className="w-4 h-4" />
                             View on GitHub
@@ -227,7 +227,7 @@ const LLDSection = () => {
                             href={data.excalidrawLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="ml-2 text-amber-400 hover:text-amber-300 flex items-center gap-1"
+                            className="ml-2 text-blue-400 hover:text-blue-300 flex items-center gap-1"
                           >
                             <ExternalLink className="w-4 h-4" />
                             View Diagram

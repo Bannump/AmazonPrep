@@ -1,13 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Code2, Users, Box, Download, Upload } from 'lucide-react';
 import ProgressBar from './components/ProgressBar';
 import DSASection from './components/DSASection';
 import LeadershipPrinciplesSection from './components/LeadershipPrinciplesSection';
 import LLDSection from './components/LLDSection';
-import { exportAllData, importAllData } from './utils/storage';
+import { exportAllData, importAllData, getDSAProblems } from './utils/storage';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dsa');
+  const [dsaData, setDsaData] = useState({});
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  useEffect(() => {
+    // Load initial data
+    setDsaData(getDSAProblems());
+  }, []);
+
+  const handleDSAUpdate = () => {
+    const updatedData = getDSAProblems();
+    setDsaData(updatedData);
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const handleExport = () => {
     const data = exportAllData();
@@ -53,26 +66,26 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100">
       {/* Header */}
-      <header className="bg-zinc-950 border-b border-zinc-800 sticky top-0 z-40">
+      <header className="bg-zinc-950 border-b border-zinc-900/50 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-white">Amazon Interview Prep Dashboard</h1>
+              <h1 className="text-2xl font-bold text-zinc-100">Amazon Interview Prep Dashboard</h1>
               <p className="text-sm text-zinc-400 mt-1">Track your progress across DSA, Behavioral, and LLD</p>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleExport}
-                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-zinc-50 rounded-lg transition-colors flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
                 Export Backup
               </button>
               <button
                 onClick={handleImport}
-                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-zinc-950 hover:bg-zinc-900 text-zinc-100 rounded-lg transition-colors flex items-center gap-2 border border-zinc-900"
               >
                 <Upload className="w-4 h-4" />
                 Import Backup
@@ -85,10 +98,10 @@ function App() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Progress Bar */}
-        <ProgressBar />
+        <ProgressBar dsaData={dsaData} refreshTrigger={refreshTrigger} />
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-6 border-b border-zinc-800">
+        <div className="flex flex-wrap gap-2 mb-6 border-b border-zinc-800/50">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -97,7 +110,7 @@ function App() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-6 py-3 flex items-center gap-2 font-semibold transition-colors border-b-2 ${
                   activeTab === tab.id
-                    ? 'border-amber-500 text-amber-500'
+                    ? 'border-blue-500 text-blue-400'
                     : 'border-transparent text-zinc-400 hover:text-zinc-300'
                 }`}
               >
@@ -110,7 +123,7 @@ function App() {
 
         {/* Tab Content */}
         <div>
-          {activeTab === 'dsa' && <DSASection />}
+          {activeTab === 'dsa' && <DSASection onDataUpdate={handleDSAUpdate} />}
           {activeTab === 'behavioral' && <LeadershipPrinciplesSection />}
           {activeTab === 'lld' && <LLDSection />}
         </div>
