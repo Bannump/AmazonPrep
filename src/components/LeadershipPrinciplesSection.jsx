@@ -45,14 +45,14 @@ const LeadershipPrinciplesSection = ({ userId = null }) => {
   };
 
   return (
-    <div className="space-y-3 sm:space-y-4">
-      <div className="bg-zinc-900/50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 border border-zinc-800/50">
-        <p className="text-zinc-300 text-xs sm:text-sm">
+    <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
+      <div className="bg-zinc-900/50 rounded-lg p-2.5 sm:p-3 md:p-4 mb-3 sm:mb-4 md:mb-6 border border-zinc-800/50">
+        <p className="text-zinc-300 text-[11px] sm:text-xs md:text-sm">
           Use the STAR method (Situation, Task, Action, Result) to prepare your behavioral stories for each Leadership Principle.
         </p>
       </div>
 
-      <div className="grid gap-3 sm:gap-4">
+      <div className="grid gap-2.5 sm:gap-3 md:gap-4">
         {leadershipPrinciples.map((principle) => {
           const isExpanded = expandedCards[principle.id];
           const status = getStatus(principle.id);
@@ -65,35 +65,35 @@ const LeadershipPrinciplesSection = ({ userId = null }) => {
               className="bg-zinc-900/50 rounded-lg border border-zinc-800/50 overflow-hidden"
             >
               <div
-                className="p-3 sm:p-4 cursor-pointer hover:bg-zinc-900/30 active:bg-zinc-900/40 transition-colors flex items-center justify-between min-h-[60px] touch-manipulation"
+                className="p-2.5 sm:p-3 md:p-4 cursor-pointer hover:bg-zinc-900/30 active:bg-zinc-900/40 transition-colors flex items-center justify-between min-h-[50px] sm:min-h-[60px] touch-manipulation"
                 onClick={() => toggleCard(principle.id)}
               >
-                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 flex-1 min-w-0">
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base sm:text-lg font-semibold text-zinc-100 mb-0.5 sm:mb-1 break-words">
+                    <h3 className="text-sm sm:text-base md:text-lg font-semibold text-zinc-100 mb-0.5 break-words leading-tight">
                       {principle.id}. {principle.name}
                     </h3>
                     {!isExpanded && (
-                      <p className="text-xs sm:text-sm text-zinc-400 line-clamp-1">
+                      <p className="text-[11px] sm:text-xs md:text-sm text-zinc-400 line-clamp-1 mt-0.5">
                         {principle.description}
                       </p>
                     )}
                   </div>
-                  <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold flex-shrink-0 ${status.color}`}>
+                  <span className={`px-1.5 sm:px-2 md:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold flex-shrink-0 ${status.color}`}>
                     {status.text}
                   </span>
                 </div>
-                <div className="ml-2 sm:ml-4 flex-shrink-0">
+                <div className="ml-1.5 sm:ml-2 md:ml-4 flex-shrink-0">
                   {isExpanded ? (
-                    <ChevronUp className="w-5 h-5 text-zinc-400" />
+                    <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-zinc-400" />
+                    <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400" />
                   )}
                 </div>
               </div>
 
               {isExpanded && (
-                <div className="border-t border-zinc-800/50 p-3 sm:p-4 space-y-3 sm:space-y-4">
+                <div className="border-t border-zinc-800/50 p-2.5 sm:p-3 md:p-4 space-y-2.5 sm:space-y-3 md:space-y-4">
                   <div>
                     <p className="text-zinc-300 text-xs sm:text-sm mb-3 sm:mb-4">{principle.description}</p>
                   </div>

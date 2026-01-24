@@ -119,19 +119,19 @@ function App() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <header className="bg-zinc-950 border-b border-zinc-900/50 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4">
-          {/* Mobile: Stack vertically, Desktop: Horizontal */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 md:py-4">
+          {/* Single row: title left, actions (incl. profile) right — profile always top-right on all screens */}
+          <div className="flex flex-row items-center justify-between gap-2">
             {/* Title Section */}
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-zinc-100 truncate">
+              <h1 className="text-base sm:text-xl md:text-2xl font-bold text-zinc-100 truncate">
                 Amazon Interview Prep
               </h1>
-              <p className="text-xs sm:text-sm text-zinc-400 mt-0.5 sm:mt-1">
+              <p className="text-[10px] sm:text-xs md:text-sm text-zinc-400 mt-0.5">
                 <span className="hidden sm:inline">Track your progress across DSA, Behavioral, and LLD</span>
                 <span className="sm:hidden">DSA • Behavioral • LLD</span>
                 {currentUser?.displayName && (
-                  <span className="ml-1 sm:ml-2 text-blue-400">
+                  <span className="hidden sm:inline ml-1 sm:ml-2 text-blue-400">
                     • {currentUser.displayName.split(' ')[0]}
                   </span>
                 )}
@@ -139,22 +139,22 @@ function App() {
             </div>
             
             {/* Actions Section */}
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {/* Export/Import - Hide on mobile, show icons only on small screens */}
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              {/* Export/Import - Show on small screens and up */}
               <button
                 onClick={handleExport}
-                className="px-2 sm:px-3 md:px-4 py-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-zinc-50 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 min-h-[44px] touch-manipulation"
+                className="px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-zinc-50 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 min-h-[40px] sm:min-h-[44px] touch-manipulation"
                 aria-label="Export backup"
               >
-                <Download className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0" />
                 <span className="hidden md:inline text-sm">Export</span>
               </button>
               <button
                 onClick={handleImport}
-                className="px-2 sm:px-3 md:px-4 py-2 bg-zinc-950 hover:bg-zinc-900 active:bg-zinc-800 text-zinc-100 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 border border-zinc-900 min-h-[44px] touch-manipulation"
+                className="px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 bg-zinc-950 hover:bg-zinc-900 active:bg-zinc-800 text-zinc-100 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 border border-zinc-900 min-h-[40px] sm:min-h-[44px] touch-manipulation"
                 aria-label="Import backup"
               >
-                <Upload className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0" />
                 <span className="hidden md:inline text-sm">Import</span>
               </button>
               
@@ -162,18 +162,18 @@ function App() {
               <div className="relative">
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-zinc-900 active:bg-zinc-800 transition-colors border border-zinc-800 min-h-[44px] touch-manipulation"
+                  className="flex items-center gap-1 sm:gap-1.5 sm:gap-2 px-1.5 sm:px-2 md:px-3 py-1.5 sm:py-2 rounded-lg hover:bg-zinc-900 active:bg-zinc-800 transition-colors border border-zinc-800 min-h-[40px] sm:min-h-[44px] touch-manipulation"
                   aria-label="Profile menu"
                 >
                   {currentUser?.photoURL ? (
                     <img
                       src={currentUser.photoURL}
                       alt={currentUser.displayName || 'Profile'}
-                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-zinc-700 flex-shrink-0"
+                      className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full border-2 border-zinc-700 flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center flex-shrink-0">
-                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400" />
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center flex-shrink-0">
+                      <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-zinc-400" />
                     </div>
                   )}
                   <span className="hidden lg:inline text-sm text-zinc-300">
@@ -187,25 +187,25 @@ function App() {
                       className="fixed inset-0 z-10"
                       onClick={() => setShowProfileMenu(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-72 sm:w-64 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl z-20 overflow-hidden">
-                      <div className="p-4 border-b border-zinc-800">
-                        <div className="flex items-center gap-3">
+                    <div className="absolute right-0 mt-2 w-[calc(100vw-1rem)] max-w-[280px] sm:w-64 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl z-20 overflow-hidden">
+                      <div className="p-3 sm:p-4 border-b border-zinc-800">
+                        <div className="flex items-center gap-2 sm:gap-3">
                           {currentUser?.photoURL ? (
                             <img
                               src={currentUser.photoURL}
                               alt={currentUser.displayName || 'Profile'}
-                              className="w-12 h-12 rounded-full border-2 border-zinc-700 flex-shrink-0"
+                              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-zinc-700 flex-shrink-0"
                             />
                           ) : (
-                            <div className="w-12 h-12 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center flex-shrink-0">
-                              <User className="w-6 h-6 text-zinc-400" />
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center flex-shrink-0">
+                              <User className="w-5 h-5 sm:w-6 sm:h-6 text-zinc-400" />
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-zinc-100 truncate">
+                            <p className="text-xs sm:text-sm font-semibold text-zinc-100 truncate">
                               {currentUser?.displayName || 'User'}
                             </p>
-                            <p className="text-xs text-zinc-400 truncate">
+                            <p className="text-[10px] sm:text-xs text-zinc-400 truncate">
                               {currentUser?.email}
                             </p>
                           </div>
@@ -214,9 +214,9 @@ function App() {
                       <div className="p-2">
                         <button
                           onClick={handleLogout}
-                          className="w-full px-4 py-3 text-left text-sm text-zinc-300 hover:bg-zinc-800 active:bg-zinc-700 rounded-lg transition-colors flex items-center gap-2 min-h-[44px] touch-manipulation"
+                          className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-left text-xs sm:text-sm text-zinc-300 hover:bg-zinc-800 active:bg-zinc-700 rounded-lg transition-colors flex items-center gap-2 min-h-[40px] sm:min-h-[44px] touch-manipulation"
                         >
-                          <LogOut className="w-4 h-4 flex-shrink-0" />
+                          <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                           Sign Out
                         </button>
                       </div>
@@ -229,27 +229,27 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+      <main className="max-w-7xl mx-auto px-2.5 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8">
         <ProgressBar dsaData={dsaData} refreshTrigger={refreshTrigger} />
 
-        {/* Tabs - Scrollable on mobile */}
-        <div className="overflow-x-auto -mx-3 sm:mx-0 mb-4 sm:mb-6 border-b border-zinc-800/50 scrollbar-hide">
-          <div className="flex gap-1 sm:gap-2 px-3 sm:px-0 min-w-max sm:min-w-0">
+        {/* Tabs - Center on mobile, left-aligned on larger screens; scrollable on mobile */}
+        <div className="overflow-x-auto -mx-2.5 sm:mx-0 mb-3 sm:mb-4 md:mb-6 border-b border-zinc-800/50 scrollbar-hide">
+          <div className="flex justify-center sm:justify-start gap-0.5 sm:gap-1 md:gap-2 px-2.5 sm:px-0 min-w-max sm:min-w-0">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 flex items-center gap-1.5 sm:gap-2 font-semibold text-sm sm:text-base transition-colors border-b-2 whitespace-nowrap min-h-[44px] touch-manipulation ${
+                  className={`px-2.5 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-2.5 md:py-3 flex items-center gap-1 sm:gap-1.5 md:gap-2 font-semibold text-xs sm:text-sm md:text-base transition-colors border-b-2 whitespace-nowrap min-h-[40px] sm:min-h-[44px] touch-manipulation ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-400'
                       : 'border-transparent text-zinc-400 hover:text-zinc-300 active:text-zinc-200'
                   }`}
                 >
-                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0" />
                   <span className="hidden sm:inline">{tab.label}</span>
-                  <span className="sm:hidden text-xs">
+                  <span className="sm:hidden text-[11px]">
                     {tab.id === 'dsa' ? 'DSA' : tab.id === 'behavioral' ? 'LP' : 'LLD'}
                   </span>
                 </button>
