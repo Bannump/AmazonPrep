@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Code2, Users, Box, Download, Upload, LogOut } from 'lucide-react';
+import { Code2, Users, Box, Download, Upload, LogOut, User } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
 import ProgressBar from './components/ProgressBar';
@@ -15,6 +15,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('dsa');
   const [dsaData, setDsaData] = useState({});
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -23,6 +24,19 @@ function App() {
       setDsaData(getDSAProblems());
     }
   }, [currentUser]);
+
+  // Close profile menu on Escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        setShowProfileMenu(false);
+      }
+    };
+    if (showProfileMenu) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [showProfileMenu]);
 
   const loadDSAData = async () => {
     if (currentUser) {
@@ -43,6 +57,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
+      setShowProfileMenu(false);
       await logout();
     } catch (error) {
       console.error('Error logging out:', error);
@@ -110,9 +125,9 @@ function App() {
               <h1 className="text-2xl font-bold text-zinc-100">Amazon Interview Prep Dashboard</h1>
               <p className="text-sm text-zinc-400 mt-1">
                 Track your progress across DSA, Behavioral, and LLD
-                {currentUser && (
+                {currentUser?.displayName && (
                   <span className="ml-2 text-blue-400">
-                    • {currentUser.displayName || currentUser.email}
+                    • Welcome back, {currentUser.displayName.split(' ')[0]}!
                   </span>
                 )}
               </p>
@@ -123,23 +138,82 @@ function App() {
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-zinc-50 rounded-lg transition-colors flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
-                Export Backup
+                <span className="hidden sm:inline">Export Backup</span>
               </button>
               <button
                 onClick={handleImport}
                 className="px-4 py-2 bg-zinc-950 hover:bg-zinc-900 text-zinc-100 rounded-lg transition-colors flex items-center gap-2 border border-zinc-900"
               >
                 <Upload className="w-4 h-4" />
-                Import Backup
+                <span className="hidden sm:inline">Import Backup</span>
               </button>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-100 rounded-lg transition-colors flex items-center gap-2 border border-zinc-800"
-                title="Sign out"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </button>
+              
+              {/* Profile Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-900 transition-colors border border-zinc-800"
+                  aria-label="Profile menu"
+                >
+                  {currentUser?.photoURL ? (
+                    <img
+                      src={currentUser.photoURL}
+                      alt={currentUser.displayName || 'Profile'}
+                      className="w-8 h-8 rounded-full border-2 border-zinc-700"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center">
+                      <User className="w-4 h-4 text-zinc-400" />
+                    </div>
+                  )}
+                  <span className="hidden md:inline text-sm text-zinc-300">
+                    {currentUser?.displayName || currentUser?.email?.split('@')[0] || 'User'}
+                  </span>
+                </button>
+
+                {showProfileMenu && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setShowProfileMenu(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl z-20 overflow-hidden">
+                      <div className="p-4 border-b border-zinc-800">
+                        <div className="flex items-center gap-3">
+                          {currentUser?.photoURL ? (
+                            <img
+                              src={currentUser.photoURL}
+                              alt={currentUser.displayName || 'Profile'}
+                              className="w-12 h-12 rounded-full border-2 border-zinc-700"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center">
+                              <User className="w-6 h-6 text-zinc-400" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-zinc-100 truncate">
+                              {currentUser?.displayName || 'User'}
+                            </p>
+                            <p className="text-xs text-zinc-400 truncate">
+                              {currentUser?.email}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-2">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
