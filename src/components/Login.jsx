@@ -18,42 +18,32 @@ const Login = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-      <div style={{ maxWidth: '28rem', width: '100%', backgroundColor: '#18181b', borderRadius: '0.5rem', padding: '2rem', border: '1px solid #27272a' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fafafa', marginBottom: '1rem' }}>
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-md bg-zinc-900 rounded-lg p-6 sm:p-8 border border-zinc-800">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-100 mb-2 sm:mb-3">
             Amazon Interview Prep
           </h1>
-          <p style={{ color: '#a1a1aa', fontSize: '1rem', marginBottom: '2rem' }}>
+          <p className="text-sm sm:text-base text-zinc-400">
             Sign in to track your personalized progress
           </p>
         </div>
 
         {error && (
-          <div style={{ marginBottom: '1.5rem', padding: '0.75rem', backgroundColor: '#7f1d1d', border: '1px solid #991b1b', borderRadius: '0.5rem' }}>
-            <p style={{ color: '#fca5a5', fontSize: '0.875rem' }}>{error}</p>
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-950 border border-red-900 rounded-lg">
+            <p className="text-sm text-red-300">{error}</p>
           </div>
         )}
 
         <button
           onClick={handleGoogleSignIn}
           disabled={loading}
-          style={{
-            width: '100%',
-            padding: '1rem',
-            backgroundColor: loading ? '#52525b' : '#3b82f6',
-            color: '#fff',
-            borderRadius: '0.5rem',
-            border: 'none',
-            fontWeight: '600',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            fontSize: '1rem'
-          }}
+          className="w-full py-3 sm:py-4 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:bg-zinc-600 disabled:cursor-not-allowed text-white rounded-lg font-semibold text-base sm:text-lg transition-colors min-h-[48px] touch-manipulation"
         >
           {loading ? 'Signing in...' : 'Continue with Google'}
         </button>
 
-        <p style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.75rem', color: '#71717a' }}>
+        <p className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-zinc-500">
           By signing in, you agree to store your progress data securely
         </p>
       </div>

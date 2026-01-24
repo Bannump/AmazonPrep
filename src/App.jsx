@@ -119,54 +119,64 @@ function App() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <header className="bg-zinc-950 border-b border-zinc-900/50 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-zinc-100">Amazon Interview Prep Dashboard</h1>
-              <p className="text-sm text-zinc-400 mt-1">
-                Track your progress across DSA, Behavioral, and LLD
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4">
+          {/* Mobile: Stack vertically, Desktop: Horizontal */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+            {/* Title Section */}
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-zinc-100 truncate">
+                Amazon Interview Prep
+              </h1>
+              <p className="text-xs sm:text-sm text-zinc-400 mt-0.5 sm:mt-1">
+                <span className="hidden sm:inline">Track your progress across DSA, Behavioral, and LLD</span>
+                <span className="sm:hidden">DSA • Behavioral • LLD</span>
                 {currentUser?.displayName && (
-                  <span className="ml-2 text-blue-400">
-                    • Welcome back, {currentUser.displayName.split(' ')[0]}!
+                  <span className="ml-1 sm:ml-2 text-blue-400">
+                    • {currentUser.displayName.split(' ')[0]}
                   </span>
                 )}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            
+            {/* Actions Section */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Export/Import - Hide on mobile, show icons only on small screens */}
               <button
                 onClick={handleExport}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-zinc-50 rounded-lg transition-colors flex items-center gap-2"
+                className="px-2 sm:px-3 md:px-4 py-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-zinc-50 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 min-h-[44px] touch-manipulation"
+                aria-label="Export backup"
               >
-                <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">Export Backup</span>
+                <Download className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span className="hidden md:inline text-sm">Export</span>
               </button>
               <button
                 onClick={handleImport}
-                className="px-4 py-2 bg-zinc-950 hover:bg-zinc-900 text-zinc-100 rounded-lg transition-colors flex items-center gap-2 border border-zinc-900"
+                className="px-2 sm:px-3 md:px-4 py-2 bg-zinc-950 hover:bg-zinc-900 active:bg-zinc-800 text-zinc-100 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 border border-zinc-900 min-h-[44px] touch-manipulation"
+                aria-label="Import backup"
               >
-                <Upload className="w-4 h-4" />
-                <span className="hidden sm:inline">Import Backup</span>
+                <Upload className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span className="hidden md:inline text-sm">Import</span>
               </button>
               
               {/* Profile Menu */}
               <div className="relative">
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-900 transition-colors border border-zinc-800"
+                  className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-zinc-900 active:bg-zinc-800 transition-colors border border-zinc-800 min-h-[44px] touch-manipulation"
                   aria-label="Profile menu"
                 >
                   {currentUser?.photoURL ? (
                     <img
                       src={currentUser.photoURL}
                       alt={currentUser.displayName || 'Profile'}
-                      className="w-8 h-8 rounded-full border-2 border-zinc-700"
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-zinc-700 flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center">
-                      <User className="w-4 h-4 text-zinc-400" />
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center flex-shrink-0">
+                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400" />
                     </div>
                   )}
-                  <span className="hidden md:inline text-sm text-zinc-300">
+                  <span className="hidden lg:inline text-sm text-zinc-300">
                     {currentUser?.displayName || currentUser?.email?.split('@')[0] || 'User'}
                   </span>
                 </button>
@@ -177,17 +187,17 @@ function App() {
                       className="fixed inset-0 z-10"
                       onClick={() => setShowProfileMenu(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl z-20 overflow-hidden">
+                    <div className="absolute right-0 mt-2 w-72 sm:w-64 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl z-20 overflow-hidden">
                       <div className="p-4 border-b border-zinc-800">
                         <div className="flex items-center gap-3">
                           {currentUser?.photoURL ? (
                             <img
                               src={currentUser.photoURL}
                               alt={currentUser.displayName || 'Profile'}
-                              className="w-12 h-12 rounded-full border-2 border-zinc-700"
+                              className="w-12 h-12 rounded-full border-2 border-zinc-700 flex-shrink-0"
                             />
                           ) : (
-                            <div className="w-12 h-12 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center flex-shrink-0">
                               <User className="w-6 h-6 text-zinc-400" />
                             </div>
                           )}
@@ -204,9 +214,9 @@ function App() {
                       <div className="p-2">
                         <button
                           onClick={handleLogout}
-                          className="w-full px-4 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 rounded-lg transition-colors flex items-center gap-2"
+                          className="w-full px-4 py-3 text-left text-sm text-zinc-300 hover:bg-zinc-800 active:bg-zinc-700 rounded-lg transition-colors flex items-center gap-2 min-h-[44px] touch-manipulation"
                         >
-                          <LogOut className="w-4 h-4" />
+                          <LogOut className="w-4 h-4 flex-shrink-0" />
                           Sign Out
                         </button>
                       </div>
@@ -219,30 +229,36 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         <ProgressBar dsaData={dsaData} refreshTrigger={refreshTrigger} />
 
-        <div className="flex flex-wrap gap-2 mb-6 border-b border-zinc-800/50">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-3 flex items-center gap-2 font-semibold transition-colors border-b-2 ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-400'
-                    : 'border-transparent text-zinc-400 hover:text-zinc-300'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                {tab.label}
-              </button>
-            );
-          })}
+        {/* Tabs - Scrollable on mobile */}
+        <div className="overflow-x-auto -mx-3 sm:mx-0 mb-4 sm:mb-6 border-b border-zinc-800/50 scrollbar-hide">
+          <div className="flex gap-1 sm:gap-2 px-3 sm:px-0 min-w-max sm:min-w-0">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 flex items-center gap-1.5 sm:gap-2 font-semibold text-sm sm:text-base transition-colors border-b-2 whitespace-nowrap min-h-[44px] touch-manipulation ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-400'
+                      : 'border-transparent text-zinc-400 hover:text-zinc-300 active:text-zinc-200'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden text-xs">
+                    {tab.id === 'dsa' ? 'DSA' : tab.id === 'behavioral' ? 'LP' : 'LLD'}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div>
+        <div className="pb-4 sm:pb-0">
           {activeTab === 'dsa' && <DSASection onDataUpdate={handleDSAUpdate} userId={currentUser?.uid} />}
           {activeTab === 'behavioral' && <LeadershipPrinciplesSection userId={currentUser?.uid} />}
           {activeTab === 'lld' && <LLDSection userId={currentUser?.uid} />}

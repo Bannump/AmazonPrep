@@ -64,14 +64,14 @@ const LLDSection = ({ userId = null }) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="bg-zinc-900/50 rounded-lg p-4 mb-6 border border-zinc-800/50">
-        <p className="text-zinc-300 text-sm">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="bg-zinc-900/50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 border border-zinc-800/50">
+        <p className="text-zinc-300 text-xs sm:text-sm">
           Track your Low-Level Design (LLD) practice. Document key classes, design patterns, and link to your diagrams or code.
         </p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3 sm:gap-4">
         {lldProblems.map((problem) => {
           const isExpanded = expandedCards[problem.id];
           const isEditing = editingProblem === problem.id;
@@ -83,15 +83,15 @@ const LLDSection = ({ userId = null }) => {
               className="bg-zinc-900/50 rounded-lg border border-zinc-800/50 overflow-hidden"
             >
               <div
-                className="p-4 cursor-pointer hover:bg-zinc-900/30 transition-colors"
+                className="p-3 sm:p-4 cursor-pointer hover:bg-zinc-900/30 active:bg-zinc-900/40 transition-colors"
                 onClick={() => !isEditing && toggleCard(problem.id)}
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-zinc-100 mb-1">
+                <div className="flex items-start sm:items-center justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base sm:text-lg font-semibold text-zinc-100 mb-0.5 sm:mb-1 break-words">
                       {problem.id}. {problem.title}
                     </h3>
-                    <p className="text-sm text-zinc-400">{problem.description}</p>
+                    <p className="text-xs sm:text-sm text-zinc-400 break-words">{problem.description}</p>
                   </div>
                   {!isEditing && (
                     <button
@@ -99,22 +99,23 @@ const LLDSection = ({ userId = null }) => {
                         e.stopPropagation();
                         handleEdit(problem);
                       }}
-                      className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-zinc-50 rounded text-sm transition-colors flex items-center gap-1"
+                      className="px-3 py-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-zinc-50 rounded-lg text-xs sm:text-sm transition-colors flex items-center gap-1.5 flex-shrink-0 min-h-[44px] touch-manipulation"
                     >
-                      <FileText className="w-4 h-4" />
-                      {data.keyClasses || data.resourceLink ? 'Edit' : 'Add Details'}
+                      <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">{data.keyClasses || data.resourceLink ? 'Edit' : 'Add Details'}</span>
+                      <span className="sm:hidden">{data.keyClasses || data.resourceLink ? 'Edit' : 'Add'}</span>
                     </button>
                   )}
                 </div>
               </div>
 
               {(isExpanded || isEditing) && (
-                <div className="border-t border-zinc-800/50 p-4 space-y-4">
+                <div className="border-t border-zinc-800/50 p-3 sm:p-4 space-y-3 sm:space-y-4">
                   {isEditing ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                       <div>
-                        <label className="block text-sm font-semibold text-zinc-300 mb-2 flex items-center gap-2">
-                          <LinkIcon className="w-4 h-4" />
+                        <label className="block text-xs sm:text-sm font-semibold text-zinc-300 mb-2 flex items-center gap-2">
+                          <LinkIcon className="w-4 h-4 flex-shrink-0" />
                           Resource/Diagram Link
                         </label>
                         <input
@@ -122,25 +123,25 @@ const LLDSection = ({ userId = null }) => {
                           value={editForm.resourceLink}
                           onChange={(e) => setEditForm({ ...editForm, resourceLink: e.target.value })}
                           placeholder="https://..."
-                          className="w-full p-2 bg-zinc-950 border border-zinc-900 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50"
+                          className="w-full p-2.5 sm:p-2 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 text-sm min-h-[44px] touch-manipulation"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-semibold text-zinc-300 mb-2">
+                        <label className="block text-xs sm:text-sm font-semibold text-zinc-300 mb-2">
                           Key Classes & Patterns
                         </label>
                         <textarea
                           value={editForm.keyClasses}
                           onChange={(e) => setEditForm({ ...editForm, keyClasses: e.target.value })}
                           placeholder="e.g., Strategy Pattern for Pricing, Factory Pattern for Vehicle Creation..."
-                          className="w-full h-32 p-3 bg-zinc-900 border border-zinc-900 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 resize-none"
+                          className="w-full min-h-[120px] sm:min-h-[128px] p-3 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 resize-y text-sm"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-semibold text-zinc-300 mb-2 flex items-center gap-2">
-                          <Github className="w-4 h-4" />
+                        <label className="block text-xs sm:text-sm font-semibold text-zinc-300 mb-2 flex items-center gap-2">
+                          <Github className="w-4 h-4 flex-shrink-0" />
                           GitHub Link
                         </label>
                         <input
@@ -148,13 +149,13 @@ const LLDSection = ({ userId = null }) => {
                           value={editForm.githubLink}
                           onChange={(e) => setEditForm({ ...editForm, githubLink: e.target.value })}
                           placeholder="https://github.com/..."
-                          className="w-full p-2 bg-zinc-950 border border-zinc-900 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50"
+                          className="w-full p-2.5 sm:p-2 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 text-sm min-h-[44px] touch-manipulation"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-semibold text-zinc-300 mb-2 flex items-center gap-2">
-                          <LinkIcon className="w-4 h-4" />
+                        <label className="block text-xs sm:text-sm font-semibold text-zinc-300 mb-2 flex items-center gap-2">
+                          <LinkIcon className="w-4 h-4 flex-shrink-0" />
                           Excalidraw Link
                         </label>
                         <input
@@ -162,20 +163,20 @@ const LLDSection = ({ userId = null }) => {
                           value={editForm.excalidrawLink}
                           onChange={(e) => setEditForm({ ...editForm, excalidrawLink: e.target.value })}
                           placeholder="https://excalidraw.com/..."
-                          className="w-full p-2 bg-zinc-950 border border-zinc-900 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50"
+                          className="w-full p-2.5 sm:p-2 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 text-sm min-h-[44px] touch-manipulation"
                         />
                       </div>
 
-                      <div className="flex justify-end gap-2">
+                      <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2">
                         <button
                           onClick={handleCancel}
-                          className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-100 rounded transition-colors"
+                          className="w-full sm:w-auto px-4 py-3 bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 text-zinc-100 rounded-lg transition-colors font-medium min-h-[44px] touch-manipulation"
                         >
                           Cancel
                         </button>
                         <button
                           onClick={() => handleSave(problem.id)}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-zinc-50 rounded transition-colors flex items-center gap-2"
+                          className="w-full sm:w-auto px-4 py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-zinc-50 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium min-h-[44px] touch-manipulation"
                         >
                           <Save className="w-4 h-4" />
                           Save
@@ -186,58 +187,58 @@ const LLDSection = ({ userId = null }) => {
                     <div className="space-y-3">
                       {data.resourceLink && (
                         <div>
-                          <span className="text-sm font-semibold text-zinc-300">Resource Link:</span>
+                          <span className="text-xs sm:text-sm font-semibold text-zinc-300 block mb-1">Resource Link:</span>
                           <a
                             href={data.resourceLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="ml-2 text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                            className="text-blue-400 hover:text-blue-300 active:text-blue-200 flex items-center gap-1.5 text-sm min-h-[44px] touch-manipulation"
                           >
-                            <ExternalLink className="w-4 h-4" />
-                            Open Link
+                            <ExternalLink className="w-4 h-4 flex-shrink-0" />
+                            <span className="break-all">{data.resourceLink}</span>
                           </a>
                         </div>
                       )}
 
                       {data.keyClasses && (
                         <div>
-                          <span className="text-sm font-semibold text-zinc-300 block mb-1">Key Classes & Patterns:</span>
-                          <p className="text-zinc-300 whitespace-pre-wrap">{data.keyClasses}</p>
+                          <span className="text-xs sm:text-sm font-semibold text-zinc-300 block mb-1">Key Classes & Patterns:</span>
+                          <p className="text-sm sm:text-base text-zinc-300 whitespace-pre-wrap break-words">{data.keyClasses}</p>
                         </div>
                       )}
 
                       {data.githubLink && (
                         <div>
-                          <span className="text-sm font-semibold text-zinc-300">GitHub:</span>
+                          <span className="text-xs sm:text-sm font-semibold text-zinc-300 block mb-1">GitHub:</span>
                           <a
                             href={data.githubLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="ml-2 text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                            className="text-blue-400 hover:text-blue-300 active:text-blue-200 flex items-center gap-1.5 text-sm min-h-[44px] touch-manipulation"
                           >
-                            <Github className="w-4 h-4" />
-                            View on GitHub
+                            <Github className="w-4 h-4 flex-shrink-0" />
+                            <span className="break-all">View on GitHub</span>
                           </a>
                         </div>
                       )}
 
                       {data.excalidrawLink && (
                         <div>
-                          <span className="text-sm font-semibold text-zinc-300">Excalidraw:</span>
+                          <span className="text-xs sm:text-sm font-semibold text-zinc-300 block mb-1">Excalidraw:</span>
                           <a
                             href={data.excalidrawLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="ml-2 text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                            className="text-blue-400 hover:text-blue-300 active:text-blue-200 flex items-center gap-1.5 text-sm min-h-[44px] touch-manipulation"
                           >
-                            <ExternalLink className="w-4 h-4" />
-                            View Diagram
+                            <ExternalLink className="w-4 h-4 flex-shrink-0" />
+                            <span className="break-all">View Diagram</span>
                           </a>
                         </div>
                       )}
 
                       {!data.resourceLink && !data.keyClasses && !data.githubLink && !data.excalidrawLink && (
-                        <p className="text-zinc-500 text-sm italic">No details added yet. Click "Add Details" to get started.</p>
+                        <p className="text-zinc-500 text-xs sm:text-sm italic">No details added yet. Click "Add Details" to get started.</p>
                       )}
                     </div>
                   )}

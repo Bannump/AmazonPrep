@@ -7,16 +7,16 @@ const ProgressBar = ({ dsaData = {}, refreshTrigger = 0 }) => {
   const progressPercentage = totalProblems > 0 ? Math.round((completedCount / totalProblems) * 100) : 0;
 
   return (
-    <div className="w-full bg-zinc-900/50 rounded-lg p-4 mb-6 border border-zinc-800/50">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-xl font-semibold text-zinc-100">Global Progress</h2>
-        <span className="text-blue-400 font-bold text-lg">
+    <div className="w-full bg-zinc-900/50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 border border-zinc-800/50">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-2 sm:mb-2">
+        <h2 className="text-base sm:text-lg md:text-xl font-semibold text-zinc-100">Global Progress</h2>
+        <span className="text-blue-400 font-bold text-base sm:text-lg">
           {completedCount} / {totalProblems} ({progressPercentage}%)
         </span>
       </div>
-      <div className="w-full bg-zinc-800/50 rounded-full h-3">
+      <div className="w-full bg-zinc-800/50 rounded-full h-2.5 sm:h-3">
         <div
-          className="bg-blue-500 h-3 rounded-full transition-all duration-300"
+          className="bg-blue-500 h-2.5 sm:h-3 rounded-full transition-all duration-300"
           style={{ width: `${progressPercentage}%` }}
         />
       </div>

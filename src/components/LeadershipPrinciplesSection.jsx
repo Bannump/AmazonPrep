@@ -45,14 +45,14 @@ const LeadershipPrinciplesSection = ({ userId = null }) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="bg-zinc-900/50 rounded-lg p-4 mb-6 border border-zinc-800/50">
-        <p className="text-zinc-300 text-sm">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="bg-zinc-900/50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 border border-zinc-800/50">
+        <p className="text-zinc-300 text-xs sm:text-sm">
           Use the STAR method (Situation, Task, Action, Result) to prepare your behavioral stories for each Leadership Principle.
         </p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3 sm:gap-4">
         {leadershipPrinciples.map((principle) => {
           const isExpanded = expandedCards[principle.id];
           const status = getStatus(principle.id);
@@ -65,25 +65,25 @@ const LeadershipPrinciplesSection = ({ userId = null }) => {
               className="bg-zinc-900/50 rounded-lg border border-zinc-800/50 overflow-hidden"
             >
               <div
-                className="p-4 cursor-pointer hover:bg-zinc-900/30 transition-colors flex items-center justify-between"
+                className="p-3 sm:p-4 cursor-pointer hover:bg-zinc-900/30 active:bg-zinc-900/40 transition-colors flex items-center justify-between min-h-[60px] touch-manipulation"
                 onClick={() => toggleCard(principle.id)}
               >
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-zinc-100 mb-1">
+                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base sm:text-lg font-semibold text-zinc-100 mb-0.5 sm:mb-1 break-words">
                       {principle.id}. {principle.name}
                     </h3>
                     {!isExpanded && (
-                      <p className="text-sm text-zinc-400 line-clamp-1">
+                      <p className="text-xs sm:text-sm text-zinc-400 line-clamp-1">
                         {principle.description}
                       </p>
                     )}
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${status.color}`}>
+                  <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-semibold flex-shrink-0 ${status.color}`}>
                     {status.text}
                   </span>
                 </div>
-                <div className="ml-4">
+                <div className="ml-2 sm:ml-4 flex-shrink-0">
                   {isExpanded ? (
                     <ChevronUp className="w-5 h-5 text-zinc-400" />
                   ) : (
@@ -93,14 +93,14 @@ const LeadershipPrinciplesSection = ({ userId = null }) => {
               </div>
 
               {isExpanded && (
-                <div className="border-t border-zinc-800/50 p-4 space-y-4">
+                <div className="border-t border-zinc-800/50 p-3 sm:p-4 space-y-3 sm:space-y-4">
                   <div>
-                    <p className="text-zinc-300 text-sm mb-4">{principle.description}</p>
+                    <p className="text-zinc-300 text-xs sm:text-sm mb-3 sm:mb-4">{principle.description}</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-zinc-300 mb-2 flex items-center gap-2">
-                      <FileText className="w-4 h-4" />
+                    <label className="block text-xs sm:text-sm font-semibold text-zinc-300 mb-2 flex items-center gap-2">
+                      <FileText className="w-4 h-4 flex-shrink-0" />
                       STAR Method Story
                     </label>
                     <div className="mb-2 text-xs text-zinc-400 space-y-1">
@@ -113,16 +113,16 @@ const LeadershipPrinciplesSection = ({ userId = null }) => {
                       value={starStory}
                       onChange={(e) => handleStoryChange(principle.id, e.target.value)}
                       placeholder="Write your STAR method story here..."
-                      className="w-full h-48 p-3 bg-zinc-900 border border-zinc-900 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 resize-none"
+                      className="w-full min-h-[180px] sm:min-h-[192px] p-3 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 resize-y text-sm"
                     />
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-zinc-400">Status:</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs sm:text-sm text-zinc-400">Status:</span>
                     <select
                       value={data.status || 'Draft'}
                       onChange={(e) => handleStatusChange(principle.id, e.target.value)}
-                      className="px-3 py-1 bg-zinc-950 border border-zinc-900 rounded text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50"
+                      className="px-3 py-2 bg-zinc-950 border border-zinc-900 rounded-lg text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 min-h-[44px] touch-manipulation"
                     >
                       <option value="Draft">Draft</option>
                       <option value="Finalized">Finalized</option>
