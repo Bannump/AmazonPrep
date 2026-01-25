@@ -33,7 +33,7 @@ function App() {
   const [rankNotification, setRankNotification] = useState(null);
   const [showScoreModal, setShowScoreModal] = useState(false);
 
-  const { totalPoints, breakdown, streak, checkIn } = useScoreCenter({
+  const { totalPoints, breakdown, streak, checkIn, dsaDoneCount, leadershipCount, lldCount } = useScoreCenter({
     dsaData,
     userId: currentUser?.uid ?? null,
     refreshTrigger
@@ -60,7 +60,7 @@ function App() {
     }
   }, [showProfileMenu]);
 
-  const processLeaderboard = useCallback(async (list, dsa, user) => {
+  const processLeaderboard = useCallback(async (list, user, fallbackTotalPoints) => {
     setLeaderboard(list);
     setLeaderboardLoading(false);
     if (!user) {
@@ -70,9 +70,7 @@ function App() {
     const idx = list.findIndex((e) => e.userId === user.uid);
     const newRank = idx >= 0 ? idx + 1 : null;
     const myEntry = idx >= 0 ? list[idx] : null;
-    const completedCount = myEntry
-      ? myEntry.completedCount
-      : (dsa && Object.values(dsa).filter((p) => p && p.status === 'Done').length) || 0;
+    const lastTotalPoints = myEntry?.totalPoints ?? fallbackTotalPoints ?? 0;
     setUserRank(newRank);
 
     let meta = null;
@@ -88,7 +86,7 @@ function App() {
           prevRank: meta.lastRank,
           newRank,
           surpassed,
-          lastCompletedCount: completedCount
+          lastCompletedCount: lastTotalPoints
         });
         return;
       }
@@ -103,19 +101,19 @@ function App() {
           prevRank: meta.lastRank,
           newRank,
           surpassedBy: above,
-          lastCompletedCount: completedCount
+          lastCompletedCount: lastTotalPoints
         });
         return;
       }
     }
     if (newRank != null) {
       try {
-        await setLeaderboardMeta(user.uid, { lastRank: newRank, lastCompletedCount: completedCount });
+        await setLeaderboardMeta(user.uid, { lastRank: newRank, lastCompletedCount: lastTotalPoints });
       } catch (_) {}
     }
   }, []);
 
-  // Sync leaderboard entry when DSA data changes, then fetch and process
+  // Sync leaderboard entry when DSA, LP, LLD, streak, or points change, then fetch and process
   useEffect(() => {
     if (!currentUser) {
       setLeaderboardLoading(false);
@@ -125,17 +123,20 @@ function App() {
     }
     const run = async () => {
       setLeaderboardLoading(true);
-      const completedCount = Object.values(dsaData || {}).filter((p) => p && p.status === 'Done').length;
       try {
         await updateLeaderboardEntry(currentUser.uid, {
           displayName: currentUser.displayName || null,
           photoURL: currentUser.photoURL || null,
-          completedCount
+          dsaSolved: dsaDoneCount ?? 0,
+          lpsFinished: leadershipCount ?? 0,
+          lldsFinished: lldCount ?? 0,
+          maxStreak: streak?.maxStreak ?? 0,
+          totalPoints: totalPoints ?? 0
         });
       } catch (_) {}
       try {
         const list = await getLeaderboard();
-        await processLeaderboard(list, dsaData, currentUser);
+        await processLeaderboard(list, currentUser, totalPoints);
       } catch (_) {
         setLeaderboard([]);
         setUserRank(null);
@@ -143,7 +144,7 @@ function App() {
       }
     };
     run();
-  }, [currentUser, dsaData, processLeaderboard]);
+  }, [currentUser, dsaData, processLeaderboard, totalPoints, dsaDoneCount, leadershipCount, lldCount, streak]);
 
   // Refetch leaderboard when opening the Leaderboard tab
   useEffect(() => {
@@ -152,13 +153,13 @@ function App() {
       setLeaderboardLoading(true);
       try {
         const list = await getLeaderboard();
-        await processLeaderboard(list, dsaData, currentUser);
+        await processLeaderboard(list, currentUser, totalPoints);
       } catch (_) {
         setLeaderboardLoading(false);
       }
     };
     run();
-  }, [currentUser, activeTab, dsaData, processLeaderboard]);
+  }, [currentUser, activeTab, processLeaderboard, totalPoints]);
 
   const handleRankNotificationDismiss = useCallback(async () => {
     if (!rankNotification || !currentUser) {

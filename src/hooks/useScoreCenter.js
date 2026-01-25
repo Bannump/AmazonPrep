@@ -34,17 +34,18 @@ function getStreakKey(userId) {
 function loadStreak(userId) {
   try {
     const raw = localStorage.getItem(getStreakKey(userId));
-    if (!raw) return { lastLoginDate: null, currentStreak: 0, streakState: 'none', penaltyEndDate: null, missCount: 0 };
+    if (!raw) return { lastLoginDate: null, currentStreak: 0, streakState: 'none', penaltyEndDate: null, missCount: 0, maxStreak: 0 };
     const p = JSON.parse(raw);
     return {
       lastLoginDate: p.lastLoginDate || null,
       currentStreak: typeof p.currentStreak === 'number' ? p.currentStreak : 0,
       streakState: p.streakState || 'none',
       penaltyEndDate: p.penaltyEndDate || null,
-      missCount: typeof p.missCount === 'number' ? p.missCount : 0
+      missCount: typeof p.missCount === 'number' ? p.missCount : 0,
+      maxStreak: typeof p.maxStreak === 'number' ? p.maxStreak : 0
     };
   } catch (_) {
-    return { lastLoginDate: null, currentStreak: 0, streakState: 'none', penaltyEndDate: null, missCount: 0 };
+    return { lastLoginDate: null, currentStreak: 0, streakState: 'none', penaltyEndDate: null, missCount: 0, maxStreak: 0 };
   }
 }
 
@@ -174,7 +175,7 @@ export function useScoreCenter({ dsaData = {}, userId = null, refreshTrigger = 0
     setStreak(next);
   }, [userId]);
 
-  const { totalPoints, breakdown } = useMemo(() => {
+  const { totalPoints, breakdown, dsaDoneCount, leadershipCount, lldCount } = useMemo(() => {
     const problemById = Object.fromEntries(problems.map((p) => [p.id, p]));
 
     // DSA: by difficulty (only Done)
@@ -265,7 +266,7 @@ export function useScoreCenter({ dsaData = {}, userId = null, refreshTrigger = 0
       total
     };
 
-    return { totalPoints: total, breakdown };
+    return { totalPoints: total, breakdown, dsaDoneCount, leadershipCount, lldCount };
   }, [dsaData, leadershipData, lldData, streak]);
 
   return {
@@ -274,6 +275,9 @@ export function useScoreCenter({ dsaData = {}, userId = null, refreshTrigger = 0
     streak,
     checkIn,
     leadershipData,
-    lldData
+    lldData,
+    dsaDoneCount,
+    leadershipCount,
+    lldCount
   };
 }
