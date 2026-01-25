@@ -1,5 +1,5 @@
 // Firestore storage utility for user-specific data
-import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { getDb } from '../config/firebase';
 
 const getUserDocRef = (userId) => {
@@ -102,6 +102,75 @@ export const getActiveTimers = async (userId) => {
     return {};
   }
 };
+
+// --- Leaderboard ---
+
+const getLeaderboardColRef = () => {
+  const db = getDb();
+  return collection(db, 'leaderboard');
+};
+
+const getLeaderboardDocRef = (userId) => {
+  const db = getDb();
+  return doc(db, 'leaderboard', userId);
+};
+
+/** Fetch leaderboard sorted by completedCount desc. Each item: { userId, displayName, photoURL, completedCount, updatedAt } */
+export const getLeaderboard = async () => {
+  try {
+    const col = getLeaderboardColRef();
+    const q = query(col, orderBy('completedCount', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ userId: d.id, ...d.data() }));
+  } catch (error) {
+    console.error('Error getting leaderboard:', error);
+    return [];
+  }
+};
+
+/** Create or update a user's leaderboard entry. Call when DSA completed count may have changed. */
+export const updateLeaderboardEntry = async (userId, { displayName, photoURL, completedCount }) => {
+  try {
+    const ref = getLeaderboardDocRef(userId);
+    await setDoc(ref, {
+      userId,
+      displayName: displayName || 'Anonymous',
+      photoURL: photoURL || null,
+      completedCount: typeof completedCount === 'number' ? completedCount : 0,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+  } catch (error) {
+    console.error('Error updating leaderboard entry:', error);
+    // Non-fatal: do not throw so DSA flow is undisturbed
+  }
+};
+
+/** Read leaderboardMeta from users/{userId}: { lastRank, lastCompletedCount }. */
+export const getLeaderboardMeta = async (userId) => {
+  try {
+    const userRef = getUserDocRef(userId);
+    const snap = await getDoc(userRef);
+    if (snap.exists()) {
+      return snap.data().leaderboardMeta || null;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting leaderboard meta:', error);
+    return null;
+  }
+};
+
+/** Save leaderboardMeta to users/{userId}. */
+export const setLeaderboardMeta = async (userId, { lastRank, lastCompletedCount }) => {
+  try {
+    const userRef = getUserDocRef(userId);
+    await setDoc(userRef, { leaderboardMeta: { lastRank, lastCompletedCount } }, { merge: true });
+  } catch (error) {
+    console.error('Error setting leaderboard meta:', error);
+  }
+};
+
+// ---
 
 export const exportAllData = async (userId) => {
   try {

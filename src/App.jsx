@@ -1,14 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Code2, Users, Box, Download, Upload, LogOut, User } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Code2, Users, Box, Download, Upload, LogOut, User, Trophy } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
 import ProgressBar from './components/ProgressBar';
 import DSASection from './components/DSASection';
 import LeadershipPrinciplesSection from './components/LeadershipPrinciplesSection';
 import LLDSection from './components/LLDSection';
+import LeaderboardSection from './components/LeaderboardSection';
+import RankNotification from './components/RankNotification';
+import ScoreBreakdownModal from './components/ScoreBreakdownModal';
+import { useScoreCenter } from './hooks/useScoreCenter';
 import { exportAllData } from './utils/userStorage';
 import { importAllData } from './utils/storage';
 import { getDSAProblems } from './utils/storage';
+import {
+  getLeaderboard,
+  updateLeaderboardEntry,
+  getLeaderboardMeta,
+  setLeaderboardMeta
+} from './utils/firestoreStorage';
 
 function App() {
   const { currentUser, logout } = useAuth();
@@ -16,6 +26,18 @@ function App() {
   const [dsaData, setDsaData] = useState({});
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(true);
+  const [userRank, setUserRank] = useState(null);
+  const [rankNotification, setRankNotification] = useState(null);
+  const [showScoreModal, setShowScoreModal] = useState(false);
+
+  const { totalPoints, breakdown, streak, checkIn } = useScoreCenter({
+    dsaData,
+    userId: currentUser?.uid ?? null,
+    refreshTrigger
+  });
 
   useEffect(() => {
     if (currentUser) {
@@ -38,6 +60,120 @@ function App() {
     }
   }, [showProfileMenu]);
 
+  const processLeaderboard = useCallback(async (list, dsa, user) => {
+    setLeaderboard(list);
+    setLeaderboardLoading(false);
+    if (!user) {
+      setUserRank(null);
+      return;
+    }
+    const idx = list.findIndex((e) => e.userId === user.uid);
+    const newRank = idx >= 0 ? idx + 1 : null;
+    const myEntry = idx >= 0 ? list[idx] : null;
+    const completedCount = myEntry
+      ? myEntry.completedCount
+      : (dsa && Object.values(dsa).filter((p) => p && p.status === 'Done').length) || 0;
+    setUserRank(newRank);
+
+    let meta = null;
+    try {
+      meta = await getLeaderboardMeta(user.uid);
+    } catch (_) {}
+
+    if (meta != null && meta.lastRank != null && newRank != null) {
+      if (newRank < meta.lastRank) {
+        const surpassed = list.slice(newRank, meta.lastRank).map((e) => e.displayName || 'Anonymous');
+        setRankNotification({
+          type: 'rank_up',
+          prevRank: meta.lastRank,
+          newRank,
+          surpassed,
+          lastCompletedCount: completedCount
+        });
+        return;
+      }
+      if (newRank > meta.lastRank) {
+        const above = list
+          .slice(0, newRank - 1)
+          .reverse()
+          .slice(0, 3)
+          .map((e) => e.displayName || 'Anonymous');
+        setRankNotification({
+          type: 'rank_down',
+          prevRank: meta.lastRank,
+          newRank,
+          surpassedBy: above,
+          lastCompletedCount: completedCount
+        });
+        return;
+      }
+    }
+    if (newRank != null) {
+      try {
+        await setLeaderboardMeta(user.uid, { lastRank: newRank, lastCompletedCount: completedCount });
+      } catch (_) {}
+    }
+  }, []);
+
+  // Sync leaderboard entry when DSA data changes, then fetch and process
+  useEffect(() => {
+    if (!currentUser) {
+      setLeaderboardLoading(false);
+      setLeaderboard([]);
+      setUserRank(null);
+      return;
+    }
+    const run = async () => {
+      setLeaderboardLoading(true);
+      const completedCount = Object.values(dsaData || {}).filter((p) => p && p.status === 'Done').length;
+      try {
+        await updateLeaderboardEntry(currentUser.uid, {
+          displayName: currentUser.displayName || null,
+          photoURL: currentUser.photoURL || null,
+          completedCount
+        });
+      } catch (_) {}
+      try {
+        const list = await getLeaderboard();
+        await processLeaderboard(list, dsaData, currentUser);
+      } catch (_) {
+        setLeaderboard([]);
+        setUserRank(null);
+        setLeaderboardLoading(false);
+      }
+    };
+    run();
+  }, [currentUser, dsaData, processLeaderboard]);
+
+  // Refetch leaderboard when opening the Leaderboard tab
+  useEffect(() => {
+    if (!currentUser || activeTab !== 'leaderboard') return;
+    const run = async () => {
+      setLeaderboardLoading(true);
+      try {
+        const list = await getLeaderboard();
+        await processLeaderboard(list, dsaData, currentUser);
+      } catch (_) {
+        setLeaderboardLoading(false);
+      }
+    };
+    run();
+  }, [currentUser, activeTab, dsaData, processLeaderboard]);
+
+  const handleRankNotificationDismiss = useCallback(async () => {
+    if (!rankNotification || !currentUser) {
+      setRankNotification(null);
+      return;
+    }
+    try {
+      await setLeaderboardMeta(currentUser.uid, {
+        lastRank: rankNotification.newRank,
+        lastCompletedCount: rankNotification.lastCompletedCount ?? 0
+      });
+    } catch (_) {}
+    setRankNotification(null);
+  }, [rankNotification, currentUser]);
+
   const loadDSAData = async () => {
     if (currentUser) {
       const { getDSAProblems } = await import('./utils/userStorage');
@@ -52,6 +188,14 @@ function App() {
     } else {
       setDsaData(getDSAProblems());
     }
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  const handleLeadershipUpdate = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  const handleLldUpdate = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
@@ -113,7 +257,8 @@ function App() {
   const tabs = [
     { id: 'dsa', label: 'DSA Problems', icon: Code2 },
     { id: 'behavioral', label: 'Leadership Principles', icon: Users },
-    { id: 'lld', label: 'LLD Lab', icon: Box }
+    { id: 'lld', label: 'LLD Lab', icon: Box },
+    { id: 'leaderboard', label: 'Leaderboard', icon: Trophy }
   ];
 
   return (
@@ -230,7 +375,22 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-2.5 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8">
-        <ProgressBar dsaData={dsaData} refreshTrigger={refreshTrigger} />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-3 sm:mb-4">
+          <div className="flex-1 min-w-0">
+            <ProgressBar
+              dsaData={dsaData}
+              refreshTrigger={refreshTrigger}
+              totalPoints={totalPoints}
+              onPointsClick={() => setShowScoreModal(true)}
+            />
+          </div>
+          {userRank != null && (
+            <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/40">
+              <Trophy className="w-4 h-4 text-amber-500" />
+              <span className="text-sm font-semibold text-amber-200">Rank #{userRank}</span>
+            </div>
+          )}
+        </div>
 
         {/* Tabs - Center on mobile, left-aligned on larger screens; scrollable on mobile */}
         <div className="overflow-x-auto -mx-2.5 sm:mx-0 mb-3 sm:mb-4 md:mb-6 border-b border-zinc-800/50 scrollbar-hide">
@@ -250,7 +410,7 @@ function App() {
                   <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 flex-shrink-0" />
                   <span className="hidden sm:inline">{tab.label}</span>
                   <span className="sm:hidden text-[11px]">
-                    {tab.id === 'dsa' ? 'DSA' : tab.id === 'behavioral' ? 'LP' : 'LLD'}
+                    {tab.id === 'dsa' ? 'DSA' : tab.id === 'behavioral' ? 'LP' : tab.id === 'lld' ? 'LLD' : 'Board'}
                   </span>
                 </button>
               );
@@ -260,10 +420,43 @@ function App() {
 
         <div className="pb-4 sm:pb-0">
           {activeTab === 'dsa' && <DSASection onDataUpdate={handleDSAUpdate} userId={currentUser?.uid} />}
-          {activeTab === 'behavioral' && <LeadershipPrinciplesSection userId={currentUser?.uid} />}
-          {activeTab === 'lld' && <LLDSection userId={currentUser?.uid} />}
+          {activeTab === 'behavioral' && (
+            <LeadershipPrinciplesSection userId={currentUser?.uid} onDataUpdate={handleLeadershipUpdate} />
+          )}
+          {activeTab === 'lld' && (
+            <LLDSection userId={currentUser?.uid} onDataUpdate={handleLldUpdate} />
+          )}
+          {activeTab === 'leaderboard' && (
+            <LeaderboardSection
+              leaderboard={leaderboard}
+              currentUserId={currentUser?.uid}
+              loading={leaderboardLoading}
+              onOpenScoreModal={() => setShowScoreModal(true)}
+            />
+          )}
         </div>
       </main>
+
+      {rankNotification && (
+        <RankNotification
+          type={rankNotification.type}
+          prevRank={rankNotification.prevRank}
+          newRank={rankNotification.newRank}
+          surpassed={rankNotification.surpassed}
+          surpassedBy={rankNotification.surpassedBy}
+          onDismiss={handleRankNotificationDismiss}
+        />
+      )}
+
+      {showScoreModal && (
+        <ScoreBreakdownModal
+          totalPoints={totalPoints}
+          breakdown={breakdown}
+          streak={streak}
+          checkIn={checkIn}
+          onClose={() => setShowScoreModal(false)}
+        />
+      )}
     </div>
   );
 }
