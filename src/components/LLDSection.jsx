@@ -3,7 +3,7 @@ import { ExternalLink, Link as LinkIcon, Github, FileText, Save } from 'lucide-r
 import { lldProblems } from '../data/lldProblems';
 import * as userStorage from '../utils/userStorage';
 
-const LLDSection = ({ userId = null }) => {
+const LLDSection = ({ userId = null, onDataUpdate }) => {
   const [lldData, setLldData] = useState({});
   const [expandedCards, setExpandedCards] = useState({});
   const [editingProblem, setEditingProblem] = useState(null);
@@ -51,6 +51,7 @@ const LLDSection = ({ userId = null }) => {
       githubLink: '',
       excalidrawLink: ''
     });
+    onDataUpdate?.();
   };
 
   const handleCancel = () => {

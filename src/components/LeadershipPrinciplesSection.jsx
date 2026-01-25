@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { leadershipPrinciples } from '../data/leadershipPrinciples';
 import * as userStorage from '../utils/userStorage';
 
-const LeadershipPrinciplesSection = ({ userId = null }) => {
+const LeadershipPrinciplesSection = ({ userId = null, onDataUpdate }) => {
   const [expandedCards, setExpandedCards] = useState({});
   const [principlesData, setPrinciplesData] = useState({});
 
@@ -26,6 +26,7 @@ const LeadershipPrinciplesSection = ({ userId = null }) => {
   const handleStoryChange = async (id, value) => {
     await userStorage.saveLeadershipPrinciple(id, { starStory: value }, userId);
     await loadData();
+    onDataUpdate?.();
   };
 
   const getStatus = (id) => {
@@ -42,6 +43,7 @@ const LeadershipPrinciplesSection = ({ userId = null }) => {
   const handleStatusChange = async (id, status) => {
     await userStorage.saveLeadershipPrinciple(id, { status }, userId);
     await loadData();
+    onDataUpdate?.();
   };
 
   return (
