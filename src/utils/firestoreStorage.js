@@ -115,11 +115,11 @@ const getLeaderboardDocRef = (userId) => {
   return doc(db, 'leaderboard', userId);
 };
 
-/** Fetch leaderboard sorted by completedCount desc. Each item: { userId, displayName, photoURL, completedCount, updatedAt } */
+/** Fetch leaderboard sorted by totalPoints desc. Each item: { userId, displayName, photoURL, maxStreak, dsaSolved, lpsFinished, lldsFinished, totalPoints, updatedAt } */
 export const getLeaderboard = async () => {
   try {
     const col = getLeaderboardColRef();
-    const q = query(col, orderBy('completedCount', 'desc'));
+    const q = query(col, orderBy('totalPoints', 'desc'));
     const snap = await getDocs(q);
     return snap.docs.map((d) => ({ userId: d.id, ...d.data() }));
   } catch (error) {
@@ -128,15 +128,19 @@ export const getLeaderboard = async () => {
   }
 };
 
-/** Create or update a user's leaderboard entry. Call when DSA completed count may have changed. */
-export const updateLeaderboardEntry = async (userId, { displayName, photoURL, completedCount }) => {
+/** Create or update a user's leaderboard entry. Call when DSA, LP, LLD, streak, or points may have changed. */
+export const updateLeaderboardEntry = async (userId, { displayName, photoURL, dsaSolved, lpsFinished, lldsFinished, maxStreak, totalPoints }) => {
   try {
     const ref = getLeaderboardDocRef(userId);
     await setDoc(ref, {
       userId,
       displayName: displayName || 'Anonymous',
       photoURL: photoURL || null,
-      completedCount: typeof completedCount === 'number' ? completedCount : 0,
+      dsaSolved: typeof dsaSolved === 'number' ? dsaSolved : 0,
+      lpsFinished: typeof lpsFinished === 'number' ? lpsFinished : 0,
+      lldsFinished: typeof lldsFinished === 'number' ? lldsFinished : 0,
+      maxStreak: typeof maxStreak === 'number' ? maxStreak : 0,
+      totalPoints: typeof totalPoints === 'number' ? totalPoints : 0,
       updatedAt: new Date().toISOString()
     }, { merge: true });
   } catch (error) {

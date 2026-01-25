@@ -95,7 +95,7 @@ npm run dev
 - **"auth/api-key-not-valid"** or **"Firebase is not configured"**: Copy `.env.example` to `.env`, fill in your real Firebase config, then restart the dev server (`npm run dev`).
 - **"Firebase: Error (auth/unauthorized-domain)"**: Add your domain to Firebase Console > Authentication > Settings > Authorized domains
 - **"Permission denied"**: Check your Firestore security rules. Ensure `users` and `leaderboard` rules are deployed.
-- **Leaderboard empty or "The query requires an index"**: In Firestore, create a single-field index on `leaderboard` for `completedCount` (descending). Firebase may prompt with a link when the query first runs.
+- **Leaderboard empty or "The query requires an index"**: In Firestore, create a single-field index on `leaderboard` for `totalPoints` (descending). Firebase may prompt with a link when the query first runs.
 - **"Firebase app not initialized"**: Make sure your `.env` file has all the correct values and you restarted the dev server after changing it
 - **Works on localhost but not on Vercel**: (1) Add all `VITE_FIREBASE_*` env vars in Vercel Project → Settings → Environment Variables, then redeploy. (2) Add your Vercel domain (e.g. `your-app.vercel.app`) to Firebase → Authentication → Authorized domains. (3) Ensure `vercel.json` includes the SPA `rewrites` so routes serve `index.html`.
 

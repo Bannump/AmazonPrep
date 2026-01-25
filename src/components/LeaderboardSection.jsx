@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { Trophy, User, Book, BarChart2 } from 'lucide-react';
-import { problems } from '../data/problems';
 import RulebookModal from './RulebookModal';
 
 const LeaderboardSection = ({ leaderboard = [], currentUserId, loading, onOpenScoreModal }) => {
   const [showRulebookModal, setShowRulebookModal] = useState(false);
-  const totalProblems = problems.length;
 
   if (loading) {
     return (
@@ -20,7 +18,7 @@ const LeaderboardSection = ({ leaderboard = [], currentUserId, loading, onOpenSc
       <div className="bg-zinc-900/50 rounded-lg p-2.5 sm:p-3 md:p-4 mb-3 sm:mb-4 border border-zinc-800/50">
         <p className="text-zinc-300 text-[11px] sm:text-xs md:text-sm flex items-center gap-2">
           <Trophy className="w-4 h-4 text-amber-500 flex-shrink-0" />
-          Ranking is based on DSA problems completed. All logged-in candidates can see the leaderboard.
+          Ranking is based on total points. All logged-in candidates can see the leaderboard.
         </p>
       </div>
 
@@ -51,14 +49,18 @@ const LeaderboardSection = ({ leaderboard = [], currentUserId, loading, onOpenSc
               <tr>
                 <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-left text-xs sm:text-sm font-semibold text-zinc-300">Rank</th>
                 <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-left text-xs sm:text-sm font-semibold text-zinc-300">Candidate</th>
-                <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-right text-xs sm:text-sm font-semibold text-zinc-300">Completed</th>
+                <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-right text-xs sm:text-sm font-semibold text-zinc-300">Max Streak</th>
+                <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-right text-xs sm:text-sm font-semibold text-zinc-300">DSA</th>
+                <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-right text-xs sm:text-sm font-semibold text-zinc-300">LPs</th>
+                <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-right text-xs sm:text-sm font-semibold text-zinc-300">LLDs</th>
+                <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-right text-xs sm:text-sm font-semibold text-zinc-300">Total pts</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/30">
               {leaderboard.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-4 py-8 text-center text-zinc-500 text-sm">
-                    No entries yet. Complete DSA problems to appear on the leaderboard.
+                  <td colSpan={7} className="px-4 py-8 text-center text-zinc-500 text-sm">
+                    No entries yet. Add progress to appear on the leaderboard.
                   </td>
                 </tr>
               )}
@@ -99,9 +101,19 @@ const LeaderboardSection = ({ leaderboard = [], currentUserId, loading, onOpenSc
                       </div>
                     </td>
                     <td className="px-3 sm:px-4 py-2.5 sm:py-3 text-right">
-                      <span className="text-zinc-300 font-medium text-sm sm:text-base">
-                        {entry.completedCount} / {totalProblems}
-                      </span>
+                      <span className="text-zinc-300 font-medium text-sm sm:text-base">{entry.maxStreak ?? 0}</span>
+                    </td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3 text-right">
+                      <span className="text-zinc-300 font-medium text-sm sm:text-base">{entry.dsaSolved ?? 0}</span>
+                    </td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3 text-right">
+                      <span className="text-zinc-300 font-medium text-sm sm:text-base">{entry.lpsFinished ?? 0}</span>
+                    </td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3 text-right">
+                      <span className="text-zinc-300 font-medium text-sm sm:text-base">{entry.lldsFinished ?? 0}</span>
+                    </td>
+                    <td className="px-3 sm:px-4 py-2.5 sm:py-3 text-right">
+                      <span className="text-amber-400 font-semibold text-sm sm:text-base">{entry.totalPoints ?? 0}</span>
                     </td>
                   </tr>
                 );
