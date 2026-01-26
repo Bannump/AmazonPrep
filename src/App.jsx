@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Code2, Users, Box, Download, Upload, LogOut, User, Trophy } from 'lucide-react';
+import { Code2, Users, Box, Download, Upload, LogOut, User, Trophy, Mail, Linkedin } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
 import ProgressBar from './components/ProgressBar';
@@ -458,6 +458,39 @@ function App() {
           onClose={() => setShowScoreModal(false)}
         />
       )}
+
+      {/* Footer */}
+      <footer className="mt-8 sm:mt-12 md:mt-16 border-t border-zinc-800/50 bg-zinc-950">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center">
+            <p className="text-xs sm:text-sm text-zinc-400">
+              © 2026 Saratchandra Patnaik. All rights reserved.
+            </p>
+            <div className="flex items-center gap-3 sm:gap-4">
+              <a
+                href="mailto:sarath92015@gmail.com"
+                className="flex items-center gap-1.5 text-xs sm:text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+                aria-label="Email"
+              >
+                <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">sarath92015@gmail.com</span>
+                <span className="sm:hidden">Email</span>
+              </a>
+              <a
+                href="https://www.linkedin.com/in/saratchandra-patnaik"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs sm:text-sm text-zinc-400 hover:text-blue-400 transition-colors"
+                aria-label="LinkedIn Profile"
+              >
+                <Linkedin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">LinkedIn</span>
+                <span className="sm:hidden">LinkedIn</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
