@@ -5,7 +5,7 @@ import { X, Book, Flame } from 'lucide-react';
 const BASE = { easy: 1, medium: 3, hard: 6, leadership: 10, lld: 6 };
 const FLAT_BONUS = 1;
 const BULK = { dsa: 7, leadership: 13, lld: 7 };
-const MISS_PENALTY = 4;
+const MISS_PENALTY = 1;
 
 export default function RulebookModal({ onClose }) {
   useEffect(() => {
