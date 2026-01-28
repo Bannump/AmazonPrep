@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ExternalLink, Clock, CheckCircle2, Circle, X, XCircle } from 'lucide-react';
-import { problems } from '../data/problems';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, ExternalLink, Clock, CheckCircle2, Circle, X, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { problems, problemsByCategory } from '../data/problems';
 import * as userStorage from '../utils/userStorage';
 
 const DSASection = ({ onDataUpdate, userId = null }) => {
@@ -12,6 +12,14 @@ const DSASection = ({ onDataUpdate, userId = null }) => {
   const [showSolutionModal, setShowSolutionModal] = useState(null);
   const [solutionText, setSolutionText] = useState('');
   const [pendingTimeTaken, setPendingTimeTaken] = useState(null);
+  const [viewMode, setViewMode] = useState('default'); // 'default', 'grouped', 'all'
+  const [expandedCategories, setExpandedCategories] = useState(() => {
+    // Initialize all categories as expanded for default view
+    return Object.keys(problemsByCategory).reduce((acc, category) => {
+      acc[category] = true;
+      return acc;
+    }, {});
+  });
 
   useEffect(() => {
     loadData();
@@ -121,7 +129,8 @@ const DSASection = ({ onDataUpdate, userId = null }) => {
     await loadData();
   };
 
-  const filteredProblems = problems.filter(problem => {
+  // Filter function for individual problems
+  const matchesFilter = (problem) => {
     const matchesSearch = problem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          problem.id.toString().includes(searchQuery);
     const matchesDifficulty = difficultyFilter === 'All' || problem.difficulty === difficultyFilter;
@@ -129,7 +138,47 @@ const DSASection = ({ onDataUpdate, userId = null }) => {
     const status = problemData.status || 'Todo';
     const matchesStatus = statusFilter === 'All' || status === statusFilter;
     return matchesSearch && matchesDifficulty && matchesStatus;
-  });
+  };
+
+  // Filter problems by category
+  const filteredProblemsByCategory = useMemo(() => {
+    const filtered = {};
+    Object.entries(problemsByCategory).forEach(([category, categoryProblems]) => {
+      const filteredProblems = categoryProblems.filter(matchesFilter);
+      if (filteredProblems.length > 0) {
+        filtered[category] = filteredProblems;
+      }
+    });
+    return filtered;
+  }, [searchQuery, difficultyFilter, statusFilter, dsaData]);
+
+  // Flattened filtered problems for backward compatibility
+  const filteredProblems = useMemo(() => {
+    return Object.values(filteredProblemsByCategory).flat();
+  }, [filteredProblemsByCategory]);
+
+  const toggleCategory = (category) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
+  const expandAllCategories = () => {
+    const allExpanded = Object.keys(problemsByCategory).reduce((acc, category) => {
+      acc[category] = true;
+      return acc;
+    }, {});
+    setExpandedCategories(allExpanded);
+  };
+
+  const collapseAllCategories = () => {
+    const allCollapsed = Object.keys(problemsByCategory).reduce((acc, category) => {
+      acc[category] = false;
+      return acc;
+    }, {});
+    setExpandedCategories(allCollapsed);
+  };
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
@@ -142,6 +191,46 @@ const DSASection = ({ onDataUpdate, userId = null }) => {
 
   return (
     <div className="space-y-3 sm:space-y-4 md:space-y-6">
+      {/* View Mode Buttons */}
+      <div className="flex flex-wrap gap-2 sm:gap-3">
+        <button
+          onClick={() => {
+            setViewMode('default');
+            expandAllCategories();
+          }}
+          className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors min-h-[40px] sm:min-h-[44px] touch-manipulation ${
+            viewMode === 'default'
+              ? 'bg-blue-600 hover:bg-blue-500 text-zinc-50'
+              : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-100 border border-zinc-800'
+          }`}
+        >
+          Default View
+        </button>
+        <button
+          onClick={() => {
+            setViewMode('grouped');
+            collapseAllCategories();
+          }}
+          className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors min-h-[40px] sm:min-h-[44px] touch-manipulation ${
+            viewMode === 'grouped'
+              ? 'bg-blue-600 hover:bg-blue-500 text-zinc-50'
+              : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-100 border border-zinc-800'
+          }`}
+        >
+          Grouped View
+        </button>
+        <button
+          onClick={() => setViewMode('all')}
+          className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors min-h-[40px] sm:min-h-[44px] touch-manipulation ${
+            viewMode === 'all'
+              ? 'bg-blue-600 hover:bg-blue-500 text-zinc-50'
+              : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-100 border border-zinc-800'
+          }`}
+        >
+          All List View
+        </button>
+      </div>
+
       {/* Filters - Stack on mobile, row on desktop */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4">
         <div className="flex-1 relative">
@@ -177,212 +266,469 @@ const DSASection = ({ onDataUpdate, userId = null }) => {
         </div>
       </div>
 
-      {/* Mobile: Card Layout, Desktop: Table */}
-      <div className="hidden md:block bg-zinc-900/50 rounded-lg border border-zinc-800/50 overflow-hidden">
-        <div className="overflow-x-auto scrollbar-hide">
-          <table className="w-full">
-            <thead className="bg-zinc-900/30 border-b border-zinc-800/50">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Status</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">ID</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Title</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Difficulty</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Time Taken</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800/30">
-              {filteredProblems.map((problem) => {
-                const problemData = dsaData[problem.id] || {};
-                const status = problemData.status || 'Todo';
-                const isActive = activeTimers[problem.id] !== undefined;
-                const elapsedTime = isActive ? getElapsedTime(problem.id) : null;
+      {/* Desktop Views */}
+      {viewMode === 'all' ? (
+        // All List View - Flat table
+        <div className="hidden md:block bg-zinc-900/50 rounded-lg border border-zinc-800/50 overflow-hidden">
+          <div className="overflow-x-auto scrollbar-hide">
+            <table className="w-full">
+              <thead className="bg-zinc-900/30 border-b border-zinc-800/50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Status</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">ID</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Title</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Difficulty</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Time Taken</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/30">
+                {filteredProblems.map((problem) => {
+                  const problemData = dsaData[problem.id] || {};
+                  const status = problemData.status || 'Todo';
+                  const isActive = activeTimers[problem.id] !== undefined;
+                  const elapsedTime = isActive ? getElapsedTime(problem.id) : null;
 
-                return (
-                  <tr key={problem.id} className="hover:bg-zinc-900/30 transition-colors">
-                    <td className="px-4 py-3">
-                      {status === 'Done' ? (
-                        <CheckCircle2 className="w-5 h-5 text-green-400" />
-                      ) : (
-                        <Circle className="w-5 h-5 text-zinc-500" />
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-zinc-300 font-mono text-sm">{problem.id}</td>
-                    <td className="px-4 py-3 text-zinc-100 font-medium">{problem.title}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>
-                        {problem.difficulty}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-zinc-400">
-                      {isActive && elapsedTime ? (
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-blue-400 animate-pulse" />
-                          <span className="text-blue-400 font-mono text-sm">{formatTime(elapsedTime)}</span>
-                        </div>
-                      ) : problemData.timeTaken ? (
-                        <span className="font-mono text-sm">{problemData.timeTaken}</span>
-                      ) : (
-                        <span className="text-zinc-600">-</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2 flex-wrap">
+                  return (
+                    <tr key={problem.id} className="hover:bg-zinc-900/30 transition-colors">
+                      <td className="px-4 py-3">
                         {status === 'Done' ? (
-                          <>
-                            <button
-                              onClick={() => handleUnmarkDone(problem.id)}
-                              className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 text-zinc-100 rounded text-sm transition-colors min-h-[36px] touch-manipulation"
-                            >
-                              Undo
-                            </button>
-                            {problemData.solution && (
-                              <button
-                                onClick={() => {
-                                  setShowSolutionModal(problem.id);
-                                  setSolutionText(problemData.solution);
-                                }}
-                                className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 active:bg-blue-500/40 text-blue-400 rounded text-sm transition-colors min-h-[36px] touch-manipulation"
-                              >
-                                View Solution
-                              </button>
-                            )}
-                          </>
+                          <CheckCircle2 className="w-5 h-5 text-green-400" />
                         ) : (
-                          <>
-                            <button
-                              onClick={() => handlePractice(problem.id)}
-                              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-zinc-50 rounded text-sm transition-colors flex items-center gap-1.5 min-h-[36px] touch-manipulation"
-                            >
-                              <ExternalLink className="w-3.5 h-3.5" />
-                              Practice
-                            </button>
-                            {isActive && (
-                              <>
-                                <button
-                                  onClick={() => handleCancelTimer(problem.id)}
-                                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-zinc-50 rounded text-sm transition-colors flex items-center gap-1.5 min-h-[36px] touch-manipulation"
-                                >
-                                  <XCircle className="w-3.5 h-3.5" />
-                                  Cancel
-                                </button>
-                                <button
-                                  onClick={() => handleMarkDone(problem.id)}
-                                  className="px-3 py-1.5 bg-green-600 hover:bg-green-700 active:bg-green-800 text-zinc-50 rounded text-sm transition-colors min-h-[36px] touch-manipulation"
-                                >
-                                  Done
-                                </button>
-                              </>
-                            )}
-                          </>
+                          <Circle className="w-5 h-5 text-zinc-500" />
                         )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="px-4 py-3 text-zinc-300 font-mono text-sm">{problem.id}</td>
+                      <td className="px-4 py-3 text-zinc-100 font-medium">{problem.title}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>
+                          {problem.difficulty}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-zinc-400">
+                        {isActive && elapsedTime ? (
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-blue-400 animate-pulse" />
+                            <span className="text-blue-400 font-mono text-sm">{formatTime(elapsedTime)}</span>
+                          </div>
+                        ) : problemData.timeTaken ? (
+                          <span className="font-mono text-sm">{problemData.timeTaken}</span>
+                        ) : (
+                          <span className="text-zinc-600">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {status === 'Done' ? (
+                            <>
+                              <button
+                                onClick={() => handleUnmarkDone(problem.id)}
+                                className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 text-zinc-100 rounded text-sm transition-colors min-h-[36px] touch-manipulation"
+                              >
+                                Undo
+                              </button>
+                              {problemData.solution && (
+                                <button
+                                  onClick={() => {
+                                    setShowSolutionModal(problem.id);
+                                    setSolutionText(problemData.solution);
+                                  }}
+                                  className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 active:bg-blue-500/40 text-blue-400 rounded text-sm transition-colors min-h-[36px] touch-manipulation"
+                                >
+                                  View Solution
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handlePractice(problem.id)}
+                                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-zinc-50 rounded text-sm transition-colors flex items-center gap-1.5 min-h-[36px] touch-manipulation"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                Practice
+                              </button>
+                              {isActive && (
+                                <>
+                                  <button
+                                    onClick={() => handleCancelTimer(problem.id)}
+                                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-zinc-50 rounded text-sm transition-colors flex items-center gap-1.5 min-h-[36px] touch-manipulation"
+                                  >
+                                    <XCircle className="w-3.5 h-3.5" />
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={() => handleMarkDone(problem.id)}
+                                    className="px-3 py-1.5 bg-green-600 hover:bg-green-700 active:bg-green-800 text-zinc-50 rounded text-sm transition-colors min-h-[36px] touch-manipulation"
+                                  >
+                                    Done
+                                  </button>
+                                </>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-
-      {/* Mobile Card Layout */}
-      <div className="md:hidden space-y-2 sm:space-y-3">
-        {filteredProblems.map((problem) => {
-          const problemData = dsaData[problem.id] || {};
-          const status = problemData.status || 'Todo';
-          const isActive = activeTimers[problem.id] !== undefined;
-          const elapsedTime = isActive ? getElapsedTime(problem.id) : null;
-
-          return (
-            <div key={problem.id} className="bg-zinc-900/50 rounded-lg border border-zinc-800/50 p-2.5 sm:p-3 md:p-4 space-y-2 sm:space-y-2.5">
-              {/* Header */}
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
-                  {status === 'Done' ? (
-                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
+      ) : (
+        // Default/Grouped View - Compact category headers
+        <div className="hidden md:block space-y-2 sm:space-y-3">
+          {Object.entries(filteredProblemsByCategory).map(([category, categoryProblems]) => (
+            <div key={category} className="bg-zinc-900/50 rounded-lg border border-zinc-800/50 overflow-hidden">
+              <button
+                onClick={() => toggleCategory(category)}
+                className="w-full px-4 py-3 bg-zinc-900/30 hover:bg-zinc-900/40 transition-colors flex items-center justify-center relative"
+              >
+                <h3 className="text-base sm:text-lg font-semibold text-zinc-100 text-center">
+                  {category} <span className="text-sm text-zinc-400 font-normal">({categoryProblems.length})</span>
+                </h3>
+                <div className="absolute right-4">
+                  {expandedCategories[category] ? (
+                    <ChevronUp className="w-5 h-5 text-zinc-400" />
                   ) : (
-                    <Circle className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-500 flex-shrink-0" />
+                    <ChevronDown className="w-5 h-5 text-zinc-400" />
                   )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                      <span className="text-zinc-400 font-mono text-xs sm:text-sm">#{problem.id}</span>
-                      <span className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>
-                        {problem.difficulty}
-                      </span>
+                </div>
+              </button>
+              {expandedCategories[category] && (
+                <div className="overflow-x-auto scrollbar-hide">
+                  <table className="w-full">
+                    <thead className="bg-zinc-900/20 border-b border-zinc-800/50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Status</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">ID</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Title</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Difficulty</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Time Taken</th>
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800/30">
+                      {categoryProblems.map((problem) => {
+                        const problemData = dsaData[problem.id] || {};
+                        const status = problemData.status || 'Todo';
+                        const isActive = activeTimers[problem.id] !== undefined;
+                        const elapsedTime = isActive ? getElapsedTime(problem.id) : null;
+
+                        return (
+                          <tr key={problem.id} className="hover:bg-zinc-900/30 transition-colors">
+                            <td className="px-4 py-3">
+                              {status === 'Done' ? (
+                                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                              ) : (
+                                <Circle className="w-5 h-5 text-zinc-500" />
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-zinc-300 font-mono text-sm">{problem.id}</td>
+                            <td className="px-4 py-3 text-zinc-100 font-medium">{problem.title}</td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>
+                                {problem.difficulty}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-zinc-400">
+                              {isActive && elapsedTime ? (
+                                <div className="flex items-center gap-2">
+                                  <Clock className="w-4 h-4 text-blue-400 animate-pulse" />
+                                  <span className="text-blue-400 font-mono text-sm">{formatTime(elapsedTime)}</span>
+                                </div>
+                              ) : problemData.timeTaken ? (
+                                <span className="font-mono text-sm">{problemData.timeTaken}</span>
+                              ) : (
+                                <span className="text-zinc-600">-</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {status === 'Done' ? (
+                                  <>
+                                    <button
+                                      onClick={() => handleUnmarkDone(problem.id)}
+                                      className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 text-zinc-100 rounded text-sm transition-colors min-h-[36px] touch-manipulation"
+                                    >
+                                      Undo
+                                    </button>
+                                    {problemData.solution && (
+                                      <button
+                                        onClick={() => {
+                                          setShowSolutionModal(problem.id);
+                                          setSolutionText(problemData.solution);
+                                        }}
+                                        className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 active:bg-blue-500/40 text-blue-400 rounded text-sm transition-colors min-h-[36px] touch-manipulation"
+                                      >
+                                        View Solution
+                                      </button>
+                                    )}
+                                  </>
+                                ) : (
+                                  <>
+                                    <button
+                                      onClick={() => handlePractice(problem.id)}
+                                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-zinc-50 rounded text-sm transition-colors flex items-center gap-1.5 min-h-[36px] touch-manipulation"
+                                    >
+                                      <ExternalLink className="w-3.5 h-3.5" />
+                                      Practice
+                                    </button>
+                                    {isActive && (
+                                      <>
+                                        <button
+                                          onClick={() => handleCancelTimer(problem.id)}
+                                          className="px-3 py-1.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-zinc-50 rounded text-sm transition-colors flex items-center gap-1.5 min-h-[36px] touch-manipulation"
+                                        >
+                                          <XCircle className="w-3.5 h-3.5" />
+                                          Cancel
+                                        </button>
+                                        <button
+                                          onClick={() => handleMarkDone(problem.id)}
+                                          className="px-3 py-1.5 bg-green-600 hover:bg-green-700 active:bg-green-800 text-zinc-50 rounded text-sm transition-colors min-h-[36px] touch-manipulation"
+                                        >
+                                          Done
+                                        </button>
+                                      </>
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Mobile Views */}
+      {viewMode === 'all' ? (
+        // All List View - Flat cards
+        <div className="md:hidden space-y-2 sm:space-y-3">
+          {filteredProblems.map((problem) => {
+            const problemData = dsaData[problem.id] || {};
+            const status = problemData.status || 'Todo';
+            const isActive = activeTimers[problem.id] !== undefined;
+            const elapsedTime = isActive ? getElapsedTime(problem.id) : null;
+
+            return (
+              <div key={problem.id} className="bg-zinc-900/50 rounded-lg border border-zinc-800/50 p-2.5 sm:p-3 md:p-4 space-y-2 sm:space-y-2.5">
+                {/* Header */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+                    {status === 'Done' ? (
+                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
+                    ) : (
+                      <Circle className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-500 flex-shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                        <span className="text-zinc-400 font-mono text-xs sm:text-sm">#{problem.id}</span>
+                        <span className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>
+                          {problem.difficulty}
+                        </span>
+                      </div>
+                      <h3 className="text-zinc-100 font-medium mt-0.5 sm:mt-1 text-sm sm:text-base break-words leading-tight">{problem.title}</h3>
                     </div>
-                    <h3 className="text-zinc-100 font-medium mt-0.5 sm:mt-1 text-sm sm:text-base break-words leading-tight">{problem.title}</h3>
                   </div>
                 </div>
-              </div>
 
-              {/* Time Taken */}
-              {isActive && elapsedTime ? (
-                <div className="flex items-center gap-1.5 sm:gap-2 text-blue-400">
-                  <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-pulse" />
-                  <span className="font-mono text-xs sm:text-sm">{formatTime(elapsedTime)}</span>
-                </div>
-              ) : problemData.timeTaken ? (
-                <div className="text-zinc-400 text-xs sm:text-sm">
-                  <span className="font-mono">{problemData.timeTaken}</span>
-                </div>
-              ) : null}
+                {/* Time Taken */}
+                {isActive && elapsedTime ? (
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-blue-400">
+                    <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-pulse" />
+                    <span className="font-mono text-xs sm:text-sm">{formatTime(elapsedTime)}</span>
+                  </div>
+                ) : problemData.timeTaken ? (
+                  <div className="text-zinc-400 text-xs sm:text-sm">
+                    <span className="font-mono">{problemData.timeTaken}</span>
+                  </div>
+                ) : null}
 
-              {/* Actions */}
-              <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-1.5 sm:pt-2">
-                {status === 'Done' ? (
-                  <>
-                    <button
-                      onClick={() => handleUnmarkDone(problem.id)}
-                      className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 text-zinc-100 rounded-lg text-xs sm:text-sm font-medium transition-colors min-h-[40px] sm:min-h-[44px] touch-manipulation"
-                    >
-                      Undo
-                    </button>
-                    {problemData.solution && (
+                {/* Actions */}
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-1.5 sm:pt-2">
+                  {status === 'Done' ? (
+                    <>
                       <button
-                        onClick={() => {
-                          setShowSolutionModal(problem.id);
-                          setSolutionText(problemData.solution);
-                        }}
-                        className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-500/20 hover:bg-blue-500/30 active:bg-blue-500/40 text-blue-400 rounded-lg text-xs sm:text-sm font-medium transition-colors min-h-[40px] sm:min-h-[44px] touch-manipulation"
+                        onClick={() => handleUnmarkDone(problem.id)}
+                        className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 text-zinc-100 rounded-lg text-xs sm:text-sm font-medium transition-colors min-h-[40px] sm:min-h-[44px] touch-manipulation"
                       >
-                        View Solution
+                        Undo
                       </button>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => handlePractice(problem.id)}
-                      className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-zinc-50 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 sm:gap-2 min-h-[40px] sm:min-h-[44px] touch-manipulation"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      Practice
-                    </button>
-                    {isActive && (
-                      <>
+                      {problemData.solution && (
                         <button
-                          onClick={() => handleCancelTimer(problem.id)}
-                          className="px-3 sm:px-4 py-2 sm:py-2.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-zinc-50 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 sm:gap-2 min-h-[40px] sm:min-h-[44px] touch-manipulation"
+                          onClick={() => {
+                            setShowSolutionModal(problem.id);
+                            setSolutionText(problemData.solution);
+                          }}
+                          className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-500/20 hover:bg-blue-500/30 active:bg-blue-500/40 text-blue-400 rounded-lg text-xs sm:text-sm font-medium transition-colors min-h-[40px] sm:min-h-[44px] touch-manipulation"
                         >
-                          <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                          Cancel
+                          View Solution
                         </button>
-                        <button
-                          onClick={() => handleMarkDone(problem.id)}
-                          className="px-3 sm:px-4 py-2 sm:py-2.5 bg-green-600 hover:bg-green-700 active:bg-green-800 text-zinc-50 rounded-lg text-xs sm:text-sm font-medium transition-colors min-h-[40px] sm:min-h-[44px] touch-manipulation"
-                        >
-                          Done
-                        </button>
-                      </>
-                    )}
-                  </>
-                )}
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handlePractice(problem.id)}
+                        className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-zinc-50 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 sm:gap-2 min-h-[40px] sm:min-h-[44px] touch-manipulation"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        Practice
+                      </button>
+                      {isActive && (
+                        <>
+                          <button
+                            onClick={() => handleCancelTimer(problem.id)}
+                            className="px-3 sm:px-4 py-2 sm:py-2.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-zinc-50 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 sm:gap-2 min-h-[40px] sm:min-h-[44px] touch-manipulation"
+                          >
+                            <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleMarkDone(problem.id)}
+                            className="px-3 sm:px-4 py-2 sm:py-2.5 bg-green-600 hover:bg-green-700 active:bg-green-800 text-zinc-50 rounded-lg text-xs sm:text-sm font-medium transition-colors min-h-[40px] sm:min-h-[44px] touch-manipulation"
+                          >
+                            Done
+                          </button>
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
+            );
+          })}
+        </div>
+      ) : (
+        // Default/Grouped View - Compact category headers
+        <div className="md:hidden space-y-2 sm:space-y-3">
+          {Object.entries(filteredProblemsByCategory).map(([category, categoryProblems]) => (
+            <div key={category} className="bg-zinc-900/50 rounded-lg border border-zinc-800/50 overflow-hidden">
+              <button
+                onClick={() => toggleCategory(category)}
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-zinc-900/30 hover:bg-zinc-900/40 transition-colors flex items-center justify-center relative"
+              >
+                <h3 className="text-base sm:text-lg font-semibold text-zinc-100 text-center">
+                  {category} <span className="text-xs sm:text-sm text-zinc-400 font-normal">({categoryProblems.length})</span>
+                </h3>
+                <div className="absolute right-3 sm:right-4">
+                  {expandedCategories[category] ? (
+                    <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400" />
+                  )}
+                </div>
+              </button>
+              {expandedCategories[category] && (
+                <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
+                  {categoryProblems.map((problem) => {
+                    const problemData = dsaData[problem.id] || {};
+                    const status = problemData.status || 'Todo';
+                    const isActive = activeTimers[problem.id] !== undefined;
+                    const elapsedTime = isActive ? getElapsedTime(problem.id) : null;
+
+                    return (
+                      <div key={problem.id} className="bg-zinc-950/50 rounded-lg border border-zinc-800/50 p-2.5 sm:p-3 space-y-2 sm:space-y-2.5">
+                        {/* Header */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+                            {status === 'Done' ? (
+                              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
+                            ) : (
+                              <Circle className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-500 flex-shrink-0" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                <span className="text-zinc-400 font-mono text-xs sm:text-sm">#{problem.id}</span>
+                                <span className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>
+                                  {problem.difficulty}
+                                </span>
+                              </div>
+                              <h3 className="text-zinc-100 font-medium mt-0.5 sm:mt-1 text-sm sm:text-base break-words leading-tight">{problem.title}</h3>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Time Taken */}
+                        {isActive && elapsedTime ? (
+                          <div className="flex items-center gap-1.5 sm:gap-2 text-blue-400">
+                            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-pulse" />
+                            <span className="font-mono text-xs sm:text-sm">{formatTime(elapsedTime)}</span>
+                          </div>
+                        ) : problemData.timeTaken ? (
+                          <div className="text-zinc-400 text-xs sm:text-sm">
+                            <span className="font-mono">{problemData.timeTaken}</span>
+                          </div>
+                        ) : null}
+
+                        {/* Actions */}
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-1.5 sm:pt-2">
+                          {status === 'Done' ? (
+                            <>
+                              <button
+                                onClick={() => handleUnmarkDone(problem.id)}
+                                className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-700 text-zinc-100 rounded-lg text-xs sm:text-sm font-medium transition-colors min-h-[40px] sm:min-h-[44px] touch-manipulation"
+                              >
+                                Undo
+                              </button>
+                              {problemData.solution && (
+                                <button
+                                  onClick={() => {
+                                    setShowSolutionModal(problem.id);
+                                    setSolutionText(problemData.solution);
+                                  }}
+                                  className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-500/20 hover:bg-blue-500/30 active:bg-blue-500/40 text-blue-400 rounded-lg text-xs sm:text-sm font-medium transition-colors min-h-[40px] sm:min-h-[44px] touch-manipulation"
+                                >
+                                  View Solution
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handlePractice(problem.id)}
+                                className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-zinc-50 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 sm:gap-2 min-h-[40px] sm:min-h-[44px] touch-manipulation"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                Practice
+                              </button>
+                              {isActive && (
+                                <>
+                                  <button
+                                    onClick={() => handleCancelTimer(problem.id)}
+                                    className="px-3 sm:px-4 py-2 sm:py-2.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-zinc-50 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 sm:gap-2 min-h-[40px] sm:min-h-[44px] touch-manipulation"
+                                  >
+                                    <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={() => handleMarkDone(problem.id)}
+                                    className="px-3 sm:px-4 py-2 sm:py-2.5 bg-green-600 hover:bg-green-700 active:bg-green-800 text-zinc-50 rounded-lg text-xs sm:text-sm font-medium transition-colors min-h-[40px] sm:min-h-[44px] touch-manipulation"
+                                  >
+                                    Done
+                                  </button>
+                                </>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
 
       {showSolutionModal !== null && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-3 sm:p-4">
