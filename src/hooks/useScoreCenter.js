@@ -9,7 +9,7 @@ const BASE = { easy: 1, medium: 3, hard: 6, leadership: 10, lld: 6 };
 const FLAT_BONUS = 1;
 const BULK = { dsa: 7, leadership: 13, lld: 7 };
 const STREAK_PTS_PER_DAY = 1;   // +1 per login from Day 2 onward (Day 1 = 0)
-const MISS_PENALTY = 4;
+const MISS_PENALTY = 1;
 
 const STORAGE_PREFIX = 'scoreCenter_streak';
 
@@ -98,7 +98,7 @@ function runCheckIn(userId) {
     return next;
   }
 
-  // Missed at least one day -> -4 pts, streak resets, enter penalty
+  // Missed at least one day -> -1 pts, streak resets, enter penalty
   next = {
     lastLoginDate: today,
     currentStreak: 0,
@@ -227,7 +227,7 @@ export function useScoreCenter({ dsaData = {}, userId = null, refreshTrigger = 0
     const streakDays = streak.streakState === 'active' ? (streak.currentStreak || 0) : 0;
     const streakPts = streakDays >= 2 ? (streakDays - 1) * STREAK_PTS_PER_DAY : 0;
 
-    // Miss penalty: -4 per missed day (when streak resets)
+    // Miss penalty: -1 per missed day (when streak resets)
     const missCount = streak.missCount || 0;
     const missPenalty = missCount * MISS_PENALTY;
 

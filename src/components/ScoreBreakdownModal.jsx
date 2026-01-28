@@ -115,11 +115,11 @@ export default function ScoreBreakdownModal({
             {str.inPenalty ? (
               <>
                 <p className="text-sm text-amber-200/90">
-                  You missed a day. −4 pts applied, streak reset. Log in 2 consecutive days to start earning again.
+                  You missed a day. −1 pts applied, streak reset. Log in 2 consecutive days to start earning again.
                 </p>
                 {(str.missCount ?? 0) > 0 && (
                   <p className="text-sm text-red-400/90 mt-1">
-                    Miss penalty: −4 × {str.missCount} = {str.penaltyDeduction ?? 0}
+                    Miss penalty: −1 × {str.missCount} = {str.penaltyDeduction ?? 0}
                   </p>
                 )}
               </>
@@ -130,7 +130,7 @@ export default function ScoreBreakdownModal({
                 </p>
                 {(str.missCount ?? 0) > 0 && (
                   <p className="text-sm text-red-400/90 mt-1">
-                    Miss penalty: −4 × {str.missCount} = {str.penaltyDeduction ?? 0}
+                    Miss penalty: −1 × {str.missCount} = {str.penaltyDeduction ?? 0}
                   </p>
                 )}
               </>
@@ -140,7 +140,7 @@ export default function ScoreBreakdownModal({
           {/* Check-in */}
           <div className="pt-2 border-t border-zinc-700">
             <p className="text-xs text-zinc-500 mb-2">
-              Check in each day to grow your streak. +1 per day from Day 2 (Day 1 = 0). If you miss a day: −4 pts, streak resets; log in 2 consecutive days to start earning again.
+              Check in each day to grow your streak. +1 per day from Day 2 (Day 1 = 0). If you miss a day: −1 pts, streak resets; log in 2 consecutive days to start earning again.
             </p>
             <button
               onClick={() => {
