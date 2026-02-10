@@ -5,7 +5,6 @@ import { X, Book, Flame } from 'lucide-react';
 const BASE = { easy: 1, medium: 3, hard: 6, leadership: 10, lld: 6 };
 const FLAT_BONUS = 1;
 const BULK = { dsa: 7, leadership: 13, lld: 7 };
-const MISS_PENALTY = 1;
 
 export default function RulebookModal({ onClose }) {
   useEffect(() => {
@@ -75,7 +74,7 @@ export default function RulebookModal({ onClose }) {
               +1 for each login after 2 consecutive logins (Day 1 = 0, Day 2 = +1, Day 3 = +1, …).
             </p>
             <p className="text-sm text-amber-200/90">
-              <strong>MISS RULE:</strong> If a day is missed: <span className="text-red-400">−{MISS_PENALTY} pts</span> to the total, streak resets, and you must log in 2 consecutive days after that to start earning bonus points again.
+              <strong>MISS RULE:</strong> No penalty for missing a day. If you miss, your streak resets; log in 2 consecutive days after that to start earning streak bonus again.
             </p>
           </section>
         </div>

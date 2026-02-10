@@ -275,7 +275,6 @@ const DSASection = ({ onDataUpdate, userId = null }) => {
               <thead className="bg-zinc-900/30 border-b border-zinc-800/50">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Status</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">ID</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Title</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Difficulty</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Time Taken</th>
@@ -298,7 +297,6 @@ const DSASection = ({ onDataUpdate, userId = null }) => {
                           <Circle className="w-5 h-5 text-zinc-500" />
                         )}
                       </td>
-                      <td className="px-4 py-3 text-zinc-300 font-mono text-sm">{problem.id}</td>
                       <td className="px-4 py-3 text-zinc-100 font-medium">{problem.title}</td>
                       <td className="px-4 py-3">
                         <span className={`px-2 py-1 rounded text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>
@@ -398,11 +396,17 @@ const DSASection = ({ onDataUpdate, userId = null }) => {
               </button>
               {expandedCategories[category] && (
                 <div className="overflow-x-auto scrollbar-hide">
-                  <table className="w-full">
+                  <table className="w-full table-fixed">
+                    <colgroup>
+                      <col className="w-14" />
+                      <col />
+                      <col className="w-28" />
+                      <col className="w-36" />
+                      <col className="w-[260px]" />
+                    </colgroup>
                     <thead className="bg-zinc-900/20 border-b border-zinc-800/50">
                       <tr>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Status</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">ID</th>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Title</th>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Difficulty</th>
                         <th className="px-4 py-3 text-left text-sm font-semibold text-zinc-300">Time Taken</th>
@@ -425,8 +429,9 @@ const DSASection = ({ onDataUpdate, userId = null }) => {
                                 <Circle className="w-5 h-5 text-zinc-500" />
                               )}
                             </td>
-                            <td className="px-4 py-3 text-zinc-300 font-mono text-sm">{problem.id}</td>
-                            <td className="px-4 py-3 text-zinc-100 font-medium">{problem.title}</td>
+                            <td className="px-4 py-3 text-zinc-100 font-medium truncate" title={problem.title}>
+                              {problem.title}
+                            </td>
                             <td className="px-4 py-3">
                               <span className={`px-2 py-1 rounded text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>
                                 {problem.difficulty}
@@ -530,7 +535,6 @@ const DSASection = ({ onDataUpdate, userId = null }) => {
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                        <span className="text-zinc-400 font-mono text-xs sm:text-sm">#{problem.id}</span>
                         <span className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>
                           {problem.difficulty}
                         </span>
@@ -647,7 +651,6 @@ const DSASection = ({ onDataUpdate, userId = null }) => {
                             )}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                                <span className="text-zinc-400 font-mono text-xs sm:text-sm">#{problem.id}</span>
                                 <span className={`px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-semibold ${getDifficultyColor(problem.difficulty)}`}>
                                   {problem.difficulty}
                                 </span>
