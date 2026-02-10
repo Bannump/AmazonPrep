@@ -113,34 +113,20 @@ export default function ScoreBreakdownModal({
               C. Continuous Login Streak (Daily Bonus)
             </h3>
             {str.inPenalty ? (
-              <>
-                <p className="text-sm text-amber-200/90">
-                  You missed a day. −1 pts applied, streak reset. Log in 2 consecutive days to start earning again.
-                </p>
-                {(str.missCount ?? 0) > 0 && (
-                  <p className="text-sm text-red-400/90 mt-1">
-                    Miss penalty: −1 × {str.missCount} = {str.penaltyDeduction ?? 0}
-                  </p>
-                )}
-              </>
+              <p className="text-sm text-amber-200/90">
+                You missed a day; streak reset. Log in 2 consecutive days to start earning bonus again.
+              </p>
             ) : (
-              <>
-                <p className="text-sm text-zinc-300">
-                  Day {str.days || 0} → +{(str.pts ?? 0).toFixed(0)} pts
-                </p>
-                {(str.missCount ?? 0) > 0 && (
-                  <p className="text-sm text-red-400/90 mt-1">
-                    Miss penalty: −1 × {str.missCount} = {str.penaltyDeduction ?? 0}
-                  </p>
-                )}
-              </>
+              <p className="text-sm text-zinc-300">
+                Day {str.days || 0} → +{(str.pts ?? 0).toFixed(0)} pts
+              </p>
             )}
           </section>
 
           {/* Check-in */}
           <div className="pt-2 border-t border-zinc-700">
             <p className="text-xs text-zinc-500 mb-2">
-              Check in each day to grow your streak. +1 per day from Day 2 (Day 1 = 0). If you miss a day: −1 pts, streak resets; log in 2 consecutive days to start earning again.
+              Check in each day to grow your streak. +1 per day from Day 2 (Day 1 = 0). No penalty for missing—if you miss a day, streak resets; log in 2 consecutive days to start earning again.
             </p>
             <button
               onClick={() => {

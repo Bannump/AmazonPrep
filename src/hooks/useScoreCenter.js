@@ -8,8 +8,7 @@ import * as userStorage from '../utils/userStorage';
 const BASE = { easy: 1, medium: 3, hard: 6, leadership: 10, lld: 6 };
 const FLAT_BONUS = 1;
 const BULK = { dsa: 7, leadership: 13, lld: 7 };
-const STREAK_PTS_PER_DAY = 1;   // +1 per login from Day 2 onward (Day 1 = 0)
-const MISS_PENALTY = 1;
+const STREAK_PTS_PER_DAY = 1;   // +1 per login from Day 2 onward (Day 1 = 0); no penalty for missing
 
 const STORAGE_PREFIX = 'scoreCenter_streak';
 
@@ -98,7 +97,7 @@ function runCheckIn(userId) {
     return next;
   }
 
-  // Missed at least one day -> -1 pts, streak resets, enter penalty
+  // Missed at least one day -> streak resets, enter penalty (no point deduction)
   next = {
     lastLoginDate: today,
     currentStreak: 0,
@@ -223,13 +222,9 @@ export function useScoreCenter({ dsaData = {}, userId = null, refreshTrigger = 0
     const bulkLeadership = bulkLeadershipFives * BULK.leadership;
     const bulkLld = bulkLldFives * BULK.lld;
 
-    // Streak: +1 per login from Day 2 (Day 1 = 0, Day 2 = +1, Day 3 = +2, ...)
+    // Streak: +1 per login from Day 2 (Day 1 = 0, Day 2 = +1, Day 3 = +2, ...); no penalty for missing
     const streakDays = streak.streakState === 'active' ? (streak.currentStreak || 0) : 0;
     const streakPts = streakDays >= 2 ? (streakDays - 1) * STREAK_PTS_PER_DAY : 0;
-
-    // Miss penalty: -1 per missed day (when streak resets)
-    const missCount = streak.missCount || 0;
-    const missPenalty = missCount * MISS_PENALTY;
 
     const total =
       baseDsa +
@@ -239,8 +234,7 @@ export function useScoreCenter({ dsaData = {}, userId = null, refreshTrigger = 0
       bulkDsa +
       bulkLeadership +
       bulkLld +
-      streakPts -
-      missPenalty;
+      streakPts;
 
     const breakdown = {
       base: {
@@ -260,8 +254,7 @@ export function useScoreCenter({ dsaData = {}, userId = null, refreshTrigger = 0
         state: streak.streakState,
         inPenalty: streak.streakState === 'penalty',
         penaltyEndDate: streak.penaltyEndDate,
-        missCount,
-        penaltyDeduction: -missPenalty
+        missCount: streak.missCount || 0
       },
       total
     };
